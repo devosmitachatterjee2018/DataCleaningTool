@@ -1,5 +1,5 @@
 ---
-title: `DataCleaningTool: An open-source MATLAB app for cooperative data cleaning'
+title: 'DataCleaningTool: An open-source MATLAB app for cooperative data cleaning'
 tags:
   - data cleaning
   - data science
@@ -14,20 +14,19 @@ authors:
     affiliation: 2
   - name: Anton Johansson
     affiliation: 1
+date: 05 January 2021
 affiliations:
  - name: Department of Mathematical Sciences, Chalmers University of Technology
    index: 1
  - name: Powertrain Department, Volvo Group Trucks Technology
    index: 2
-date: 21 November 2020
 bibliography: paper.bib
-
 ---
 
 # Summary
 Nowadays, organizations rely on data driven decision making. Data driven decision making is a process which involves collecting large amount of data, analyzing patterns and facts from these insights and using them to develop strategies that benefit organizations. Successful analysis depends on accurate and well structured data. Thus, high quality data is of utmost priority to draw good and valid business decisions and strategies. However, real world data is messy and almost never comes in a clean way. Data cleaning is the ultimate way to solve the data problems. But, data cleaning is really a time consuming task. This demands data cleaning tools for systematically examining data for errors and automatically cleaning them using algorithms. These data cleaning tools help organizations save time and increase their efficiency. 
 
-In order to achieve the task of data cleaning, we develop a cooperative, free and open source data cleaning standalone MATLAB application named `DataCleaningTool'. This application is able to identify the potential data problems and report results such that the users can make informed decisions to clean data effectively.
+In order to achieve the task of data cleaning, we develop a cooperative, free and open source data cleaning standalone MATLAB application named 'DataCleaningTool'. This application is able to identify the potential data problems and report results such that the users can make informed decisions to clean data effectively.
 
 
 # Statement of Need
@@ -54,7 +53,7 @@ DataCleaningTool provides various assistances to users to clean data quickly and
 
 2. **Outlier Detection** - DataCleaningTool can illustrate possible outliers. It can either replace an outlier with a missing observation or delete any row containing outliers.
 
-3. **Missing Data Handling** - DataCleaningTool can illustrate missing observations. It can delete rows or features containing large number of missing observations. It can impute missing observations using missForest method `[@Stekhoven:2012]`. It shows expected error of imputation for both numerical and categorical features.
+3. **Missing Data Handling** - DataCleaningTool can illustrate missing observations. It can delete rows or features containing large number of missing observations. It can impute missing observations using missForest method [@Stekhoven:2012]. It shows expected error of imputation for both numerical and categorical features.
 
 4. **Encoding** - DataCleaningTool can encode categorical features into numerical equivalents. Both label encoding and one-hot encoding approaches are implemented in the application.
 
@@ -65,25 +64,19 @@ DataCleaningTool provides various assistances to users to clean data quickly and
 # Related Research and Software
 Similar research projects that are associated with data cleaning include development of the following software packages. 
 
-* datacleaner `[@Olson:2016]` is a Python library which only works with data in pandas DataFrames.  It does the following tasks: deletes features with missing observations, replaces missing observations with mean for continuous features and median for categorical features, and encodes categorical features into numerical ones.
+* datacleaner [@Olson:2016] is a Python library which only works with data in pandas DataFrames.  It does the following tasks: deletes features with missing observations, replaces missing observations with mean for continuous features and median for categorical features, and encodes categorical features into numerical ones.
 
-* dataMaid `[@Petersen:2019]` is a R package. It summarizes each feature in the data and encounters several data problems such as extra whitespace, missing data and outliers, depending on the datatype of the feature. 
+* dataMaid [@Petersen:2019] is a R package. It summarizes each feature in the data and encounters several data problems such as extra whitespace, missing data and outliers, depending on the datatype of the feature. 
 
+# Figures
+
+![Data Properties Widget. DataCleaningTool consists of multiple widgets and buttons. Each widget illustrates its corresponding data cleaning mechanism and each button aims to deal with a specific data problem.](dataproperties.png)
 
 # Acknowledgements
 
-We are thankful to Klara Jansson, Volvo Group for the useful discussions.
+The authors wish to thank Klara Jansson, Volvo Group for the helpful discussions during the development of the application.
 
 # References
-
-\begin{figure}[h!]
-    \centering
-    \includegraphics[width=1\textwidth]{dataproperties.png}
-    \caption{Data Properties Widget. DataCleaningTool consists of multiple widgets and buttons. Each widget illustrates its corresponding data cleaning mechanism and each button aims to deal with a specific data problem.}
-    \label{fig:example}
-\end{figure}
-
-
 
 
 
