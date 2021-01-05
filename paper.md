@@ -74,7 +74,7 @@ Similar research projects that are associated with data cleaning include develop
 
 # Acknowledgements
 
-The authors wish to thank Klara Jansson, Volvo Group for the helpful discussions during the development of the application.
+The authors wish to thank Klara Jansson, Volvo Group Trucks Technology for the helpful discussions during the development of the application.
 
 # References
 
