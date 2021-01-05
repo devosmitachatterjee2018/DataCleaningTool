@@ -40,7 +40,7 @@ The primary ideas behind developing DataCleaningTool are the following.
 3. **Addressing reasonable number of data problems which cause erroneous conclusion and failing algorithms** - DataCleaningTool aims to clean data by resolving inconsistencies, smoothing noisy data, removing outliers or imputing missing observations using model based imputation method.
 
 # Method
-DataCleaningTool provides various assistances to users to clean data quickly and efficiently. DataCleaningTool is shown in figure 1.
+DataCleaningTool provides various assistances to users to clean data quickly and efficiently. DataCleaningTool is shown in figure \autoref{fig:dataproperties}.
 
 ## Automated Assistances
 
@@ -70,7 +70,7 @@ Similar research projects that are associated with data cleaning include develop
 
 # Figures
 
-![Data Properties Widget. DataCleaningTool consists of multiple widgets and buttons. Each widget illustrates its corresponding data cleaning mechanism and each button aims to deal with a specific data problem.](dataproperties.png)
+![Data Properties Widget. DataCleaningTool consists of multiple widgets and buttons. Each widget illustrates its corresponding data cleaning mechanism and each button aims to deal with a specific data problem. \label{fig:dataproperties}](dataproperties.png)
 
 # Acknowledgements
 
