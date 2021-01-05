@@ -16,9 +16,9 @@ authors:
     affiliation: 1
 date: 05 January 2021
 affiliations:
- - name: Department of Mathematical Sciences, Chalmers University of Technology
+ - name: Department of Mathematical Sciences, Chalmers University of Technology, Gothenburg, Sweden
    index: 1
- - name: Powertrain Department, Volvo Group Trucks Technology
+ - name: Powertrain Department, Volvo Group Trucks Technology, Gothenburg, Sweden
    index: 2
 bibliography: paper.bib
 ---
