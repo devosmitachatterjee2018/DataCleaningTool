@@ -3,11 +3,11 @@ DataCleaningTool is a user friendly, free and open source standalone application
 
 ## Table of contents ##
 - [A statement of need](#A-statement-of-need)
-# Installation instructions
-# Example usage
-# API documentation
-# Community guidelines
-# Functionality
-# Tests
+- [Installation instructions](#Installation-instructions)
+- [Example usage](#Example-usage)
+- [API documentation](#API-documentation)
+- [Community guidelines](#Community-guidelines)
+- [Functionality](#Functionality)
+- [Tests](#Tests)
 
 
