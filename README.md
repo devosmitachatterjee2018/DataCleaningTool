@@ -2,18 +2,24 @@
 A cooperative data cleaning standalone application.
 
 ## Table of contents ##
-- [Overview](#Overview)
+- [A statement of need](#A-statement-of-need)
   - [What is DataCleaningTool?](#What-is-DataCleaningTool?)
   - [Why is DataCleaningTool needed?](#Why-is-DataCleaningTool-needed?)
+  - [Target audience](#Target-audience)
 - [Installation instructions](#Installation-instructions)
+  - [Prerequisites](#Prerequisites)
+  - [App installation](#App-installation)
 - [Example usage](#Example-usage)
-- [API documentation](#API-documentation)
+
 - [Community guidelines](#Community-guidelines)
+  - Reporting issues
+  - Contributing code
+  - Testing
 - [Functionality](#Functionality)
 - [Tests](#Tests)
 
 
-## Overview ##
+## A statement of need ##
 
 ### What is DataCleaningTool? ###
 DataCleaningTool is a user friendly, free and open source standalone application in order to support the task of data cleaning in a cooperative way. The tool can identify the potential data problems and report results such that the users can make informed decisions to clean data effectively. 
@@ -27,3 +33,16 @@ The primary ideas behind developing DataCleaningTool are the following.
 
 3. **Addressing reasonable number of data problems which cause erroneous conclusion and failing algorithms** - DataCleaningTool aims to clean data by resolving inconsistencies, smoothing noisy data, dealing with outliers or imputing missing observations using model based imputation method.
 
+## Installation instructions ##
+
+### Prerequisites ###
+DataCleaningTool has been developed and tested in Matlab 2018b.
+
+DataCleaningTool Standalone Desktop App requires the Matlab Compiler Runtime to be installed.
+
+### Application installation ###
+**Standalone application:** Download and run  and follow instructions. If not already present, the MATLAB Compiler Runtime (mcr) R2018b will be downloaded from the web and installed automatically.
+
+If MATLAB Compiler Runtime R2018b is already installed on your computer, you can also use the portable version of SharpViSu: download file "Portable/SharpViSu.zip" and unpack it to a preferred location.
+
+Matlab code. Add folder “SharpViSu” to the search directory of Matlab. The code was tested and compiled in Matlab R2014a.
