@@ -2,8 +2,9 @@
 A cooperative data cleaning standalone application.
 
 ## Table of contents ##
-- [A statement of need](#A-statement-of-need)
-  - [A statement of need](#A-statement-of-need)
+- [Overview](#Overview)
+  - [What is DataCleaningTool?](#What-is-DataCleaningTool?)
+  - [Why is DataCleaningTool needed?](#Why-is-DataCleaningTool-needed?)
 - [Installation instructions](#Installation-instructions)
 - [Example usage](#Example-usage)
 - [API documentation](#API-documentation)
@@ -12,7 +13,8 @@ A cooperative data cleaning standalone application.
 - [Tests](#Tests)
 
 
-## A statement of need ##
+## Overview ##
+### What is DataCleaningTool? ###
 DataCleaningTool is a user friendly, free and open source standalone application in order to support the task of data cleaning in a cooperative way. The tool can identify the potential data problems and report results such that the users can make informed decisions to clean data effectively. The primary ideas behind developing DataCleaningTool are the following.
 
 1. **Time effectivity** - Data cleaning is a time daunting task to go through manually large number of datasets for identifying the errors. DataCleaningTool is an application for systematically examining data for errors and automatically cleaning them using algorithms.  
