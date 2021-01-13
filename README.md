@@ -3,7 +3,7 @@ A cooperative data cleaning standalone application.
 
 ## Table of contents ##
 - [A statement of need](#A-statement-of-need)
--- [A statement of need](#A-statement-of-need)
+  - [A statement of need](#A-statement-of-need)
 - [Installation instructions](#Installation-instructions)
 - [Example usage](#Example-usage)
 - [API documentation](#API-documentation)
