@@ -43,6 +43,6 @@ DataCleaningTool Standalone Desktop App requires the Matlab Compiler Runtime to 
 ### Application installation ###
 **Standalone application:** Download and run  and follow instructions. If not already present, the MATLAB Compiler Runtime (mcr) R2018b will be downloaded from the web and installed automatically.
 
-If MATLAB Compiler Runtime R2018b is already installed on your computer, you can also use the portable version of SharpViSu: download file "Portable/SharpViSu.zip" and unpack it to a preferred location.
 
-Matlab code. Add folder “SharpViSu” to the search directory of Matlab. The code was tested and compiled in Matlab R2014a.
+
+Matlab code. Add folder to the search directory of Matlab. 
