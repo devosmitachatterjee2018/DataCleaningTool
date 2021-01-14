@@ -99,10 +99,10 @@ To contribute fixes, feature additions or enhancements, a pull request can be cr
 
 2. check that all tests pass, and
 
-3. include new tests to cover the change.
+3. include new tests to report the change.
 
-### Testing ###
-
+### Seeking Support ###
+If any support needed, the author <chatterjeedevosmita267@gmail.com> can be contacted
 
 ## Functionality ##
 
