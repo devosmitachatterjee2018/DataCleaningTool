@@ -16,7 +16,7 @@ A cooperative data cleaning standalone application.
 - [Community guidelines](#Community-guidelines)
   - [Reporting issues](#Reporting-issues)
   - [Contributing code](#Contributing-code)
-  - [Testing](#Testing)
+  - [Seeking support](#Seeking-support)
 - [Functionality](#Functionality)
 - [Tests](#Tests)
 - [Software license](#Software-license)
@@ -103,7 +103,7 @@ To contribute fixes, feature additions or enhancements, a pull request can be cr
 
 3. include new tests to report the change.
 
-### Seeking Support ###
+### Seeking support ###
 If any support needed, the author can be contacted by e-mail <chatterjeedevosmita267@gmail.com>. 
 
 ## Tests ##
