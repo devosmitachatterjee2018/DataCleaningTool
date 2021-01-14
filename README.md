@@ -86,13 +86,23 @@ A simple example is demonstrated with an exemplary dataset [demodata.csv](https:
 ## Community guidelines ##
 
 ### Reporting issues ###
-Any feature addition or software related problem can be added to the  with the software that you would like addressed with the development community, please submit an issue on the Issues tab of the project GitHub repository. You may want to search the existing issues before submitting, to avoid asking a question or requesting a feature that has already been discussed.
+Any feature request or issue can be submitted to the the [Issues](https://github.com/devosmitachatterjee2018/DataCleaningTool/issues) tab of the project GitHub repository. When reporting issues, the folowing should be included.
+1. description of the problem and minimal example,
+
+2. error message, and
+
+3. MATLAB version and Operating System.
 
 ### Contributing code ###
-If you are interested in modifying EUKulele, you may fork the project for your own use, as detailed in the MIT License we have adopted for the project. In order to contribute, please contact the developers via Arianna Krinos (akrinos (at) mit (dot) edu) after making the desired changes, after which a pull request may be submitted.
+To contribute fixes, feature additions or enhancements, a pull request can be created in the [Pull requests](https://github.com/devosmitachatterjee2018/DataCleaningTool/pulls) tab of the project GitHub repository. When contributing code, the folowing should be included.
+1. description of the change,
+
+2. check that all tests pass, and
+
+3. include new tests to cover the change.
 
 ### Testing ###
-If you have questions about how to use EUKulele, or would like to seek out collaborations related to this project, you may contact Arianna Krinos at akrinos (at) mit (dot) edu.
+
 
 ## Functionality ##
 
