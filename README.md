@@ -47,11 +47,24 @@ DataCleaningTool Standalone Desktop App requires the [Matlab Compiler Runtime (m
 ### Application installation ###
 **Standalone Desktop App.** 
 1. Download [Standalone Desktop App/for_redistribution.zip](https://github.com/devosmitachatterjee2018/DataCleaningTool/blob/main/Standalone%20Desktop%20App/for_redistribution.zip) and unzip it to a preferred location.
-2. Run "DataCleaningTool.exe" and follow instructions. If not already present, the MATLAB Compiler Runtime (mcr) R2018b will be downloaded from the web and installed automatically.
 
-**MATLAB App.** Add folder to the search directory of Matlab. 
+2. Run the executable file "DataCleaningTool.exe" and follow instructions. If not already present, the MATLAB Compiler Runtime (mcr) R2018b will be downloaded from the web and installed automatically.
 
+**MATLAB App.** 
+1. Download [MATLAB App/DataCleaningTool.mlappinstall](https://github.com/devosmitachatterjee2018/DataCleaningTool/tree/main/MATLAB%20App).
+
+2. Add the app installer file "DataCleaningTool.mlappinstall" to the current working folder in MATLAB.
+
+3. Double-click "DataCleaningTool.mlappinstall". 
+
+4. A dialog box is opened. Click 'Install'. 
+
+5. Once installed, the app is added to the MATLAB Toolstrip. Locate the installed app and select 'Add to favorites'.
+
+6. Click the app icon to run the program.
+ 
 **Functions.**
+The [code](https://github.com/devosmitachatterjee2018/DataCleaningTool/tree/main/Functions) may be opened directly in MATLAB. Descriptions of the main files and dependent files are described in the following.
 
 ## Example usage ##
 
@@ -60,3 +73,15 @@ To access the complete reference documentation, refer to [UserManual.pdf](https:
 
 ### Simple example ###
 simple example with [demodata.csv](https://github.com/devosmitachatterjee2018/DataCleaningTool/blob/main/demodata.csv).
+
+## Community guidelines ##
+
+### Reporting issues ###
+
+### Contributing code ###
+
+### Testing ###
+
+## Functionality ##
+
+## Tests ##
