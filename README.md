@@ -13,9 +13,9 @@ A cooperative data cleaning standalone application.
   - [Reference documentation](#Reference-documentation)
   - [Simple example](#Simple-example)
 - [Community guidelines](#Community-guidelines)
-  - Reporting issues(#Reporting-issues)
-  - Contributing code(#Contributing-code)
-  - Testing(#Testing)
+  - [Reporting issues](#Reporting-issues)
+  - [Contributing code](#Contributing-code)
+  - [Testing](#Testing)
 - [Functionality](#Functionality)
 - [Tests](#Tests)
 
@@ -50,6 +50,10 @@ DataCleaningTool Standalone Desktop App requires the [Matlab Compiler Runtime (m
 
 2. Run the executable file "DataCleaningTool.exe" and follow instructions. If not already present, the MATLAB Compiler Runtime (mcr) R2018b will be downloaded from the web and installed automatically.
 
+3. Once installed, the app is added to the Start Menu in Windows.
+
+4. Click the app icon to run the program.
+
 **MATLAB App.** 
 1. Download [MATLAB App/DataCleaningTool.mlappinstall](https://github.com/devosmitachatterjee2018/DataCleaningTool/tree/main/MATLAB%20App).
 
@@ -64,15 +68,20 @@ DataCleaningTool Standalone Desktop App requires the [Matlab Compiler Runtime (m
 6. Click the app icon to run the program.
  
 **Functions.**
-The [code](https://github.com/devosmitachatterjee2018/DataCleaningTool/tree/main/Functions) may be opened directly in MATLAB. Descriptions of the main files and dependent files are described in the following.
+1. Download all the \*.m files from [DataCleaningTool/Functions](https://github.com/devosmitachatterjee2018/DataCleaningTool/tree/main/Functions). The folder contains a main file and ten dependent files.
+
+2. Add all the \*.m files to the current working folder in MATLAB.
+
+3. Run "DataCleaningTool.m".
 
 ## Example usage ##
+
 
 ### Reference documentation ###
 To access the complete reference documentation, refer to [UserManual.pdf](https://github.com/devosmitachatterjee2018/DataCleaningTool/blob/main/UserManual.pdf).
 
 ### Simple example ###
-simple example with [demodata.csv](https://github.com/devosmitachatterjee2018/DataCleaningTool/blob/main/demodata.csv).
+A simple example is demonstrated with an exemplary dataset [demodata.csv](https://github.com/devosmitachatterjee2018/DataCleaningTool/blob/main/demodata.csv).
 
 ## Community guidelines ##
 
