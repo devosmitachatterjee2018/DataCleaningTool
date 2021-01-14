@@ -51,4 +51,9 @@ DataCleaningTool Standalone Desktop App requires the Matlab Compiler Runtime to 
 
 **Matlab App.** Add folder to the search directory of Matlab. 
 **Functions.**
-To access the complete reference documentation, refer to [https://github.com/devosmitachatterjee2018/DataCleaningTool/blob/main/UserManual.pdf](https://github.com/devosmitachatterjee2018/DataCleaningTool/blob/main/UserManual.pdf).
+## Example usage ##
+### Reference documentation ###
+To access the complete reference documentation, refer to [UserManual.pdf](https://github.com/devosmitachatterjee2018/DataCleaningTool/blob/main/UserManual.pdf).
+
+### Simple example ###
+simple example with [demodata.csv](https://github.com/devosmitachatterjee2018/DataCleaningTool/blob/main/demodata.csv).
