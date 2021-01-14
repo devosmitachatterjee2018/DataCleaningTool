@@ -18,6 +18,7 @@ A cooperative data cleaning standalone application.
   - [Testing](#Testing)
 - [Functionality](#Functionality)
 - [Tests](#Tests)
+- [Software license](#Software-license)
 
 
 ## A statement of need ##
@@ -105,10 +106,9 @@ To contribute fixes, feature additions or enhancements, a pull request can be cr
 If any support needed, the author can be contacted by e-mail <chatterjeedevosmita267@gmail.com>. 
 
 ## Tests ##
-1. Download [Standalone Desktop App/for_redistribution.zip](https://github.com/devosmitachatterjee2018/DataCleaningTool/blob/main/Standalone%20Desktop%20App/for_redistribution.zip) and unzip it to a preferred location.
+1. Download [Standalone Desktop App/for_testing.zip](https://github.com/devosmitachatterjee2018/DataCleaningTool/blob/main/Standalone%20Desktop%20App/for_testing.zip) and unzip it to a preferred location.
 
-2. Run the executable file "DataCleaningTool.exe" and follow instructions. If not already present, the MATLAB Compiler Runtime (mcr) R2018b will be downloaded from the web and installed automatically.
+2. Run "DataCleaningTool.exe" for testing.
 
-3. Once installed, the app is added to the Start Menu in Windows.
-
-4. Click the app icon to run the program.
+## Software license ##
+DataCleaningTool is released under the [LICENSE](https://github.com/devosmitachatterjee2018/DataCleaningTool/blob/main/LICENSE) GNU General Public License v3.0.
