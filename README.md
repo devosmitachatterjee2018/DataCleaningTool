@@ -47,7 +47,7 @@ DataCleaningTool Standalone Desktop App requires the [Matlab Compiler Runtime (m
 ### Application installation ###
 **Standalone Desktop App.** 
 1. Download [Standalone Desktop App/for_redistribution.zip](https://github.com/devosmitachatterjee2018/DataCleaningTool/blob/main/Standalone%20Desktop%20App/for_redistribution.zip) and unzip it to a preferred location.
-2. Run DataCleaningTool.exe and follow instructions. If not already present, the MATLAB Compiler Runtime (mcr) R2018b will be downloaded from the web and installed automatically.
+2. Run ``DataCleaningTool.exe" and follow instructions. If not already present, the MATLAB Compiler Runtime (mcr) R2018b will be downloaded from the web and installed automatically.
 
 **MATLAB App.** Add folder to the search directory of Matlab. 
 
