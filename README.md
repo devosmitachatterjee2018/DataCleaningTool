@@ -1,6 +1,6 @@
 # DataCleaningTool
 A cooperative data cleaning standalone application.
-![DataCleaningTool\label{fig:DataCleaningTool}](DataCleaningTool.png){ width=50% }
+![DataCleaningTool\label{fig:DataCleaningTool}](DataCleaningTool.png| width=100)
 
 ## Table of contents ##
 - [A statement of need](#A-statement-of-need)
