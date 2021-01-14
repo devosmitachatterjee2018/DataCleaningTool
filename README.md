@@ -86,7 +86,7 @@ A simple example is demonstrated with an exemplary dataset [demodata.csv](https:
 ## Community guidelines ##
 
 ### Reporting issues ###
-If you have any suggestions for feature additions or any problems with the software that you would like addressed with the development community, please submit an issue on the Issues tab of the project GitHub repository. You may want to search the existing issues before submitting, to avoid asking a question or requesting a feature that has already been discussed.
+Any feature addition or software related problem can be added to the  with the software that you would like addressed with the development community, please submit an issue on the Issues tab of the project GitHub repository. You may want to search the existing issues before submitting, to avoid asking a question or requesting a feature that has already been discussed.
 
 ### Contributing code ###
 If you are interested in modifying EUKulele, you may fork the project for your own use, as detailed in the MIT License we have adopted for the project. In order to contribute, please contact the developers via Arianna Krinos (akrinos (at) mit (dot) edu) after making the desired changes, after which a pull request may be submitted.
