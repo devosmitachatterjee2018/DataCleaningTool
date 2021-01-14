@@ -10,7 +10,7 @@ A cooperative data cleaning standalone application.
   - [Prerequisites](#Prerequisites)
   - [App installation](#App-installation)
 - [Example usage](#Example-usage)
-  - [Reference documentation](#Complete-documentation)
+  - [Reference documentation](#Reference-documentation)
   - [Simple example](#Simple-example)
 - [Community guidelines](#Community-guidelines)
   - Reporting issues(#Reporting-issues)
@@ -40,17 +40,18 @@ DataCleaningTool should be of interest mainly to readers in the area of data sci
 ## Installation instructions ##
 
 ### Prerequisites ###
-DataCleaningTool has been developed and tested in Matlab 2018b.
+DataCleaningTool has been developed and tested in MATLAB Version: R2018b.
 
-DataCleaningTool Standalone Desktop App requires the Matlab Compiler Runtime to be installed.
+DataCleaningTool Standalone Desktop App requires the [Matlab Compiler Runtime (mcr) R2018b](https://se.mathworks.com/products/compiler/matlab-runtime.html) to be installed.
 
 ### Application installation ###
-**Standalone Desktop App.** Download and run  and follow instructions. If not already present, the MATLAB Compiler Runtime (mcr) R2018b will be downloaded from the web and installed automatically.
-
-
+**Standalone Desktop App.** 
+- 1. Download and run  and follow instructions. If not already present, the MATLAB Compiler Runtime (mcr) R2018b will be downloaded from the web and installed automatically.
 
 **Matlab App.** Add folder to the search directory of Matlab. 
+
 **Functions.**
+
 ## Example usage ##
 ### Reference documentation ###
 To access the complete reference documentation, refer to [UserManual.pdf](https://github.com/devosmitachatterjee2018/DataCleaningTool/blob/main/UserManual.pdf).
