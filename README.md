@@ -51,7 +51,7 @@ DataCleaningTool has been developed and tested in MATLAB Version: R2018b and req
 
 4. MATLAB Report Generator
 
-DataCleaningTool Standalone Desktop App requires the [Matlab Compiler Runtime (mcr) R2018b](https://se.mathworks.com/products/compiler/matlab-runtime.html) to be installed.
+DataCleaningTool Standalone Desktop App has been tested in Windows 10 and requires the [Matlab Compiler Runtime (mcr) R2018b](https://se.mathworks.com/products/compiler/matlab-runtime.html) to be installed.
 
 ### Application installation ###
 **Standalone Desktop App.** 
