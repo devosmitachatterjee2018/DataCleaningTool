@@ -14,9 +14,9 @@ A cooperative data cleaning standalone application.
   - [Reference documentation](#Reference-documentation)
   - [Simple example](#Simple-example)
 - [Community guidelines](#Community-guidelines)
-  - [Reporting issues](#Reporting-issues)
-  - [Contributing code](#Contributing-code)
-  - [Seeking support](#Seeking-support)
+  - [Contribute to the software](#Contribute-to-the-software)
+  - [Report issues or problems with the software](#Report-issues-or-problems-with-the-software)
+  - [Seek support](#Seek-support)
 - [Functionality](#Functionality)
 - [Tests](#Tests)
 - [Software license](#Software-license)
@@ -148,8 +148,6 @@ Any feature request or issue can be submitted to the the [Issues](https://github
 2. Error message
 
 3. MATLAB version and Operating System
-
-
 
 ### Seek support ###
 If any support needed, the author can be contacted by e-mail <chatterjeedevosmita267@gmail.com>. 
