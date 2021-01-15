@@ -42,9 +42,7 @@ DataCleaningTool should be of interest mainly to readers in the area of data sci
 ## Installation instructions ##
 
 ### Prerequisites ###
-DataCleaningTool has been developed and tested in MATLAB Version: R2018b.
-
-DataCleaningTool requires the following MATLAB toolboxes.
+DataCleaningTool has been developed and tested in MATLAB Version: R2018b and requires the following toolboxes.
 1. System Identification Toolbox
 
 2. Statistics and Machine Learning Toolbox
