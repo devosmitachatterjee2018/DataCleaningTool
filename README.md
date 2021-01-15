@@ -85,13 +85,28 @@ DataCleaningTool Standalone Desktop App has been tested in Windows 10 and requir
 
 ## Example usage ##
 
-
 ### Reference documentation ###
-To access the complete reference documentation, refer to [UserManual.pdf](https://github.com/devosmitachatterjee2018/DataCleaningTool/blob/main/UserManual.pdf).
+To access the complete reference documentation with the exemplary dataset [demodata.csv](https://github.com/devosmitachatterjee2018/DataCleaningTool/blob/main/demodata.csv), refer to [UserManual.pdf](https://github.com/devosmitachatterjee2018/DataCleaningTool/blob/main/UserManual.pdf).
 
 ### Simple example ###
-A simple example is demonstrated with an exemplary dataset [demodata.csv](https://github.com/devosmitachatterjee2018/DataCleaningTool/blob/main/demodata.csv).
+A simple example is demonstrated with the dataset [demodata.csv](https://github.com/devosmitachatterjee2018/DataCleaningTool/blob/main/demodata.csv).
+** Drop feature with large number of missing observations **
+We use Delete Feature button to drop 'Longitude' feature which has a large number of missing values.
 
+Step 1. Select a feature from Feature column of missing observations percentage table. Click Delete Feature button.
+<img src="figures/deletefeaturesimputation2.png" width="650" height="500">
+
+Step 2. Check that the selected feature is deleted.
+<img src="figures/deletefeaturesimputation4.png" width="650" height="500">
+
+** Illustrate and impute missing observations **
+We use Impute button to impute missing values in the example data using missForest method.
+
+Step 1.  Click Impute button.
+<img src="figures/impute1.png" width="650" height="500">
+
+Step 2. Check that the missing observations are imputed.
+<img src="figures/impute3.png" width="650" height="500">
 ## Community guidelines ##
 
 ### Reporting issues ###
