@@ -44,6 +44,15 @@ DataCleaningTool should be of interest mainly to readers in the area of data sci
 ### Prerequisites ###
 DataCleaningTool has been developed and tested in MATLAB Version: R2018b.
 
+DataCleaningTool requires the following MATLAB toolboxes.
+1. System Identification Toolbox
+
+2. Statistics and Machine Learning Toolbox
+
+3. Financial Toolbox
+
+4. MATLAB Report Generator
+
 DataCleaningTool Standalone Desktop App requires the [Matlab Compiler Runtime (mcr) R2018b](https://se.mathworks.com/products/compiler/matlab-runtime.html) to be installed.
 
 ### Application installation ###
