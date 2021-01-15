@@ -91,7 +91,7 @@ To access the complete reference documentation with the exemplary dataset [demod
 ### Simple example ###
 DataCleaningTool is a data cleaning application which consists of multiple widgets and buttons. 
 
-<img src="figures/datacleaningtool.png">
+<img src="figures/datacleaningtoolApp.png">
  
 A simple example is demonstrated on the Imputation widget using the example dataset [demodata_clean.csv](https://github.com/devosmitachatterjee2018/DataCleaningTool/blob/main/demodata_clean.csv).
 
