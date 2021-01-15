@@ -89,29 +89,23 @@ DataCleaningTool Standalone Desktop App has been tested in Windows 10 and requir
 To access the complete reference documentation with the exemplary dataset [demodata.csv](https://github.com/devosmitachatterjee2018/DataCleaningTool/blob/main/demodata.csv), refer to [UserManual.pdf](https://github.com/devosmitachatterjee2018/DataCleaningTool/blob/main/UserManual.pdf).
 
 ### Simple example ###
+DataCleaningTool is a data cleaning application which consists of multiple widgets and buttons. 
+
+<img src="figures/datacleaningtool.png">
+ 
+A simple example is demonstrated on the Imputation widget using the example dataset [demodata_clean.csv](https://github.com/devosmitachatterjee2018/DataCleaningTool/blob/main/demodata_clean.csv).
+
 The Imputation widget displays information about the missing data and the expected error of imputation for numerical and categorical features. The properties of the Imputation widget are as follows. 
 
-1. The widgets shows information about missing data such as percentage of missing data, expected error of imputation for numerical and categorical features. The performance analysis results of the missForest method discussed in chapter 4 is used to predict the expected error of imputation for numerical and categorical features for the specific ratio of data and percentage of missing data.
+1. The widgets shows information about missing data such as percentage of missing data, expected error of imputation for numerical and categorical features. The performance analysis results of the missForest method is used to predict the expected error of imputation for numerical and categorical features for the specific ratio of data and percentage of missing data. 
 
-2. The widget also presents the missing observations percentage table and the missingness plot.
+2. The widget also presents the missing observations percentage table and the missingness plot. 
 
-3. The Delete Feature button is used to delete a feature from data. This drops a feature which contains a large number of missing values.
+3. The Delete Feature button is used to delete a feature from data. This drops a feature which contains a large number of missing values. 
 
-4. The Impute button is used to replace missing observations by estimated ones using missForest algorithm.
+4. The Impute button is used to replace missing observations by estimated ones using missForest algorithm. If datetime observations are missing, a message stating that datetime imputation is not possible appears in red color in the lower side of the Imputation widget. 
 
-5. If datetime observations are missing, a message stating that datetime imputation is not possible appears in red color in the lower side of the Imputation widget.
-
-6. The information of the missing data in the widget gets updated after each activity.
-
-
-\begin{figure}[h!]
-    \centering
-     \includegraphics[width=1\textwidth]{figure/imputation.png}
-     \caption{Imputation Widget.}
-     \label{fig:imputation1}
-\end{figure}
-
-A simple example is demonstrated with the example dataset [demodata.csv](https://github.com/devosmitachatterjee2018/DataCleaningTool/blob/main/demodata.csv).
+5. The information of the missing data in the widget gets updated after each activity.
 
 **Drop feature with large number of missing observations.**
 
