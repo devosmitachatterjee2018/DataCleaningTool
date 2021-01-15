@@ -17,7 +17,6 @@ A cooperative data cleaning standalone application.
   - [Contribute to the software](#Contribute-to-the-software)
   - [Report issues or problems with the software](#Report-issues-or-problems-with-the-software)
   - [Seek support](#Seek-support)
-- [Functionality](#Functionality)
 - [Tests](#Tests)
 - [Software license](#Software-license)
 
