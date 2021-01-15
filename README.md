@@ -50,7 +50,7 @@ DataCleaningTool has been developed and tested in MATLAB Version: R2018b and req
 
 4. MATLAB Report Generator
 
-DataCleaningTool Standalone Desktop App has been tested in Windows 10 and requires the [Matlab Compiler Runtime (mcr) R2018b](https://se.mathworks.com/products/compiler/matlab-runtime.html) to be installed.
+DataCleaningTool Standalone Desktop App has been tested in Windows 10 and requires the [Matlab Compiler Runtime (MCR) R2018b](https://se.mathworks.com/products/compiler/matlab-runtime.html) to be installed.
 
 ### Application installation ###
 **Standalone Desktop App.** 
@@ -88,15 +88,13 @@ DataCleaningTool Standalone Desktop App has been tested in Windows 10 and requir
 To access the complete reference documentation with the exemplary dataset [demodata.csv](https://github.com/devosmitachatterjee2018/DataCleaningTool/blob/main/demodata.csv), refer to [UserManual.pdf](https://github.com/devosmitachatterjee2018/DataCleaningTool/blob/main/UserManual.pdf).
 
 ### Simple example ###
-DataCleaningTool is a data cleaning application which consists of multiple widgets and buttons. 
+DataCleaningTool is a data cleaning application which consists of multiple widgets and buttons. Each widget illustrates its corresponding data cleaning mechanism and each button aims to deal with a specific data problem.
 
 <img src="figures/datacleaningtoolApp.png">
  
-A simple example is demonstrated on the Imputation widget using the example dataset [demodata_clean.csv](https://github.com/devosmitachatterjee2018/DataCleaningTool/blob/main/demodata_clean.csv).
+A simple example is demonstrated on the Imputation widget using the example dataset [demodata_clean.csv](https://github.com/devosmitachatterjee2018/DataCleaningTool/blob/main/demodata_clean.csv). The Imputation widget displays information about missing data and the expected error of imputation for numerical and categorical features. The properties of the Imputation widget are as follows. 
 
-The Imputation widget displays information about the missing data and the expected error of imputation for numerical and categorical features. The properties of the Imputation widget are as follows. 
-
-1. The widgets shows information about missing data such as percentage of missing data, expected error of imputation for numerical and categorical features. The performance analysis results of the missForest method is used to predict the expected error of imputation for numerical and categorical features for the specific ratio of data and percentage of missing data. 
+1. The widgets shows statistics about missing data such as percentage of missing data, expected error of imputation for numerical and categorical features. The performance analysis results of the missForest method is used to predict the expected error of imputation for numerical and categorical features for the specific ratio of data and percentage of missing data. 
 
 2. The widget also presents the missing observations percentage table and the missingness plot. 
 
@@ -105,6 +103,8 @@ The Imputation widget displays information about the missing data and the expect
 4. The Impute button is used to replace missing observations by estimated ones using missForest algorithm. If datetime observations are missing, a message stating that datetime imputation is not possible appears in red color in the lower side of the Imputation widget. 
 
 5. The information of the missing data in the widget gets updated after each activity.
+
+<img src="figures/imputation.png">
 
 **Drop feature with large number of missing observations.**
 
