@@ -90,14 +90,19 @@ To access the complete reference documentation with the exemplary dataset [demod
 
 ### Simple example ###
 The Imputation widget displays information about the missing data and the expected error of imputation for numerical and categorical features. The properties of the Imputation widget are as follows. 
-* The widgets shows information about missing data such as percentage of missing data, expected error of imputation for numerical and categorical features. The performance analysis results of the missForest method discussed in chapter 4 is used to predict the expected error of imputation for numerical and categorical features for the specific ratio of data and percentage of missing data.
-\item The widget also presents the missing observations percentage table and the missingness plot.
-\item The Delete Feature button is used to delete a feature from data. This drops a feature which contains a large number of missing values.
-\item The Impute button is used to
-replace missing observations by estimated ones using missForest algorithm.
-\item  If datetime observations are missing, a message stating that datetime imputation is not possible appears in red color in the lower side of the Imputation widget.
-\item The information of the missing data in the widget gets updated after each activity.
-\end{itemize}
+
+1. The widgets shows information about missing data such as percentage of missing data, expected error of imputation for numerical and categorical features. The performance analysis results of the missForest method discussed in chapter 4 is used to predict the expected error of imputation for numerical and categorical features for the specific ratio of data and percentage of missing data.
+
+2. The widget also presents the missing observations percentage table and the missingness plot.
+
+3. The Delete Feature button is used to delete a feature from data. This drops a feature which contains a large number of missing values.
+
+4. The Impute button is used to replace missing observations by estimated ones using missForest algorithm.
+
+5. If datetime observations are missing, a message stating that datetime imputation is not possible appears in red color in the lower side of the Imputation widget.
+
+6. The information of the missing data in the widget gets updated after each activity.
+
 
 \begin{figure}[h!]
     \centering
@@ -114,7 +119,7 @@ In the example dataset, 'Longitude' has a large number of missing values. We use
 
 Step 1. Select a feature from Feature column of missing observations percentage table. Click Delete Feature button.
 
-<img src="figures/deletefeaturesimputation2.png" width="650" height="500">
+<img src="figures/deletefeaturesimputation2.png">
 
 Step 2. Delete Feature button in use turns grey in color and returns back to its original color once the task is completed. Check that the selected feature is deleted.
 
