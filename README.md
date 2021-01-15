@@ -117,7 +117,7 @@ Step 1. Select a feature from Feature column of missing observations percentage 
 
 Step 2. Delete Feature button in use turns grey in color and returns back to its original color once the task is completed. Check that the selected feature is deleted.
 
-<img src="figures/deletefeaturesimputation4.png" width="650" height="500">
+<img src="figures/deletefeaturesimputation4.png">
 
 **Illustrate and impute missing observations.**
 
@@ -125,11 +125,11 @@ We use Impute button to impute missing values in the example data using missFore
 
 Step 1.  Click Impute button.
 
-<img src="figures/impute1.png" width="650" height="500">
+<img src="figures/impute1.png">
 
 Step 2. Impute button in use turns grey in color and returns back to its original color once it completes its task. Check that the missing observations are imputed.
 
-<img src="figures/impute3.png" width="650" height="500">
+<img src="figures/impute3.png">
 
 ## Community guidelines ##
 
