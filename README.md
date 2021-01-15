@@ -133,23 +133,25 @@ Step 2. Impute button in use turns grey in color and returns back to its origina
 
 ## Community guidelines ##
 
-### Reporting issues ###
-Any feature request or issue can be submitted to the the [Issues](https://github.com/devosmitachatterjee2018/DataCleaningTool/issues) tab of the project GitHub repository. When reporting issues, the folowing should be included.
-1. description of the problem and minimal example,
+### Contribute to the software ###
+To contribute fixes, feature additions or enhancements, a pull request can be created in the [Pull requests](https://github.com/devosmitachatterjee2018/DataCleaningTool/pulls) tab of the project GitHub repository. When contributing to the software, the folowing should be included.
+1. Description of the change
 
-2. error message, and
+2. Check that all tests pass
 
-3. MATLAB version and Operating System.
+3. Include new tests to report the change
 
-### Contributing code ###
-To contribute fixes, feature additions or enhancements, a pull request can be created in the [Pull requests](https://github.com/devosmitachatterjee2018/DataCleaningTool/pulls) tab of the project GitHub repository. When contributing code, the folowing should be included.
-1. description of the change,
+### Report issues or problems with the software ###
+Any feature request or issue can be submitted to the the [Issues](https://github.com/devosmitachatterjee2018/DataCleaningTool/issues) tab of the project GitHub repository. When reporting issues with the software, the folowing should be included.
+1. Description of the problem and minimal example
 
-2. check that all tests pass, and
+2. Error message
 
-3. include new tests to report the change.
+3. MATLAB version and Operating System
 
-### Seeking support ###
+
+
+### Seek support ###
 If any support needed, the author can be contacted by e-mail <chatterjeedevosmita267@gmail.com>. 
 
 ## Tests ##
