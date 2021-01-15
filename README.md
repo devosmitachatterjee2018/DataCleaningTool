@@ -90,7 +90,8 @@ To access the complete reference documentation with the exemplary dataset [demod
 
 ### Simple example ###
 A simple example is demonstrated with the dataset [demodata.csv](https://github.com/devosmitachatterjee2018/DataCleaningTool/blob/main/demodata.csv).
-** Drop feature with large number of missing observations **
+
+**Drop feature with large number of missing observations**
 We use Delete Feature button to drop 'Longitude' feature which has a large number of missing values.
 
 Step 1. Select a feature from Feature column of missing observations percentage table. Click Delete Feature button.
@@ -99,7 +100,7 @@ Step 1. Select a feature from Feature column of missing observations percentage 
 Step 2. Check that the selected feature is deleted.
 <img src="figures/deletefeaturesimputation4.png" width="650" height="500">
 
-** Illustrate and impute missing observations **
+**Illustrate and impute missing observations**
 We use Impute button to impute missing values in the example data using missForest method.
 
 Step 1.  Click Impute button.
@@ -107,6 +108,7 @@ Step 1.  Click Impute button.
 
 Step 2. Check that the missing observations are imputed.
 <img src="figures/impute3.png" width="650" height="500">
+
 ## Community guidelines ##
 
 ### Reporting issues ###
