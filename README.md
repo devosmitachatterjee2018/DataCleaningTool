@@ -42,13 +42,13 @@ DataCleaningTool should be of interest mainly to readers in the area of data sci
 
 ### Prerequisites ###
 DataCleaningTool has been developed and tested in MATLAB Version: R2018b and requires the following toolboxes.
-1. System Identification Toolbox;
+1. `System Identification Toolbox`;
 
-2. Statistics and Machine Learning Toolbox;
+2. `Statistics and Machine Learning Toolbox`;
 
-3. Financial Toolbox;
+3. `Financial Toolbox`;
 
-4. MATLAB Report Generator.
+4. `MATLAB Report Generator`.
 
 DataCleaningTool Standalone Desktop App has been tested in Windows 10 and requires the [Matlab Compiler Runtime (MCR) R2018b](https://se.mathworks.com/products/compiler/matlab-runtime.html) to be installed.
 
@@ -134,19 +134,19 @@ Step 2. Impute button in use turns grey in color and returns back to its origina
 
 ### Contribute to the software ###
 To contribute fixes, feature modifications or enhancements, a pull request can be created in the [Pull requests](https://github.com/devosmitachatterjee2018/DataCleaningTool/pulls) tab of the project GitHub repository. When contributing to the software, the folowing should be included.
-1. Description of the change;
+1. `Description of the change`;
 
-2. Check that all tests pass;
+2. `Check that all tests pass`;
 
-3. Include new tests to report the change.
+3. `Include new tests to report the change`.
 
 ### Report issues or problems with the software ###
 Any feature request or issue can be submitted to the the [Issues](https://github.com/devosmitachatterjee2018/DataCleaningTool/issues) tab of the project GitHub repository. When reporting issues with the software, the folowing should be included.
-1. Description of the problem;
+1. `Description of the problem`;
 
-2. Error message;
+2. `Error message`;
 
-3. MATLAB version and Operating System.
+3. `MATLAB version and Operating System`.
 
 ### Seek support ###
 If any support needed, the author can be contacted by e-mail <chatterjeedevosmita267@gmail.com>. 
