@@ -54,6 +54,7 @@ DataCleaningTool Standalone Desktop App has been tested in Windows 10 and requir
 
 ### Application installation ###
 **Standalone Desktop App.** 
+
 Step 1. Download [Standalone Desktop App/for_redistribution.zip](https://github.com/devosmitachatterjee2018/DataCleaningTool/blob/main/Standalone%20Desktop%20App/for_redistribution.zip) and unzip it to a preferred location.
 
 Step 2. Run the executable file "DataCleaningTool.exe" and follow instructions. If not already present, the MATLAB Compiler Runtime (mcr) R2018b will be downloaded from the web and installed automatically.
@@ -63,6 +64,7 @@ Step 3. Once installed, the app is added to the Start Menu in Windows.
 Step 4. Click the app icon to run the program.
 
 **MATLAB App.** 
+
 Step 1. Download [MATLAB App/DataCleaningTool.mlappinstall](https://github.com/devosmitachatterjee2018/DataCleaningTool/tree/main/MATLAB%20App).
 
 Step 2. Add the app installer file "DataCleaningTool.mlappinstall" to the current working folder in MATLAB.
@@ -76,6 +78,7 @@ Step 5. Once installed, the app is added to the MATLAB Toolstrip. Locate the ins
 Step 6. Click the app icon to run the program.
  
 **Functions.**
+
 Step 1. Download all the \*.m files from [DataCleaningTool/Functions](https://github.com/devosmitachatterjee2018/DataCleaningTool/tree/main/Functions). The folder contains a main file and ten dependent files.
 
 Step 2. Add all the \*.m files to the current working folder in MATLAB.
