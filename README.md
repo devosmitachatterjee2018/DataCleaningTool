@@ -101,9 +101,9 @@ A simple example is demonstrated on the Imputation widget using the example data
 
 2. The widget also presents the missing observations percentage table and the missingness plot. 
 
-3. The Delete Feature button is used to delete a feature from data. This drops a feature which contains a large number of missing values. 
+3. The `Delete Feature button` is used to delete a feature from data. This drops a feature which contains a large number of missing values. 
 
-4. The Impute button is used to replace missing observations by estimated ones using missForest algorithm. If datetime observations are missing, a message stating that datetime imputation is not possible appears in red color in the lower side of the Imputation widget. 
+4. The `Impute button` is used to replace missing observations by estimated ones using missForest algorithm. If datetime observations are missing, a message stating that datetime imputation is not possible appears in red color in the lower side of the Imputation widget. 
 
 5. The information of the missing data in the widget gets updated after each activity.
 
@@ -111,21 +111,21 @@ A simple example is demonstrated on the Imputation widget using the example data
 
 **Drop feature with large number of missing observations.**
 
-In the example dataset, 'Longitude' has a large number of missing values. We use Delete Feature button to delete 'Longitude' feature.
+In the example dataset, 'Longitude' has a large number of missing values. We use `Delete Feature button` to delete 'Longitude' feature.
 
-Step 1. Select a feature from Feature column of missing observations percentage table. Click Delete Feature button.
+Step 1. Select a feature from Feature column of missing observations percentage table. Click `Delete Feature button`.
 
 <img src="figures/deletefeaturesimputation2.png">
 
-Step 2. Delete Feature button in use turns grey in color and returns back to its original color once the task is completed. Check that the selected feature is deleted.
+Step 2. `Delete Feature button` in use turns grey in color and returns back to its original color once the task is completed. Check that the selected feature is deleted.
 
 <img src="figures/deletefeaturesimputation4.png">
 
 **Illustrate and impute missing observations.**
 
-We use Impute button to impute missing values in the example data using missForest method.
+We use `Impute button` to impute missing values in the example data using missForest method.
 
-Step 1.  Click Impute button.
+Step 1.  Click `Impute button`.
 
 <img src="figures/impute1.png">
 
