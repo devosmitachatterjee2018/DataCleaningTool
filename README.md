@@ -142,7 +142,7 @@ To contribute fixes, feature additions or enhancements, a pull request can be cr
 
 ### Report issues or problems with the software ###
 Any feature request or issue can be submitted to the the [Issues](https://github.com/devosmitachatterjee2018/DataCleaningTool/issues) tab of the project GitHub repository. When reporting issues with the software, the folowing should be included.
-1. Description of the problem and minimal example
+1. Description of the problem
 
 2. Error message
 
