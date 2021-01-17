@@ -129,7 +129,7 @@ Step 1.  Click `Impute button`.
 
 <img src="figures/impute1.png">
 
-Step 2. Impute button in use turns grey in color and returns back to its original color once it completes its task. Check that the missing observations are imputed.
+Step 2. `Impute button` in use turns grey in color and returns back to its original color once it completes its task. Check that the missing observations are imputed.
 
 <img src="figures/impute3.png">
 
