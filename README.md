@@ -1,4 +1,4 @@
-# DataCleaningTool
+# DataCleaningTool[![View DataCleaningTool on File Exchange](https://www.mathworks.com/matlabcentral/images/matlab-file-exchange.svg)](https://se.mathworks.com/matlabcentral/fileexchange/85875-datacleaningtool)
 A cooperative data cleaning standalone application.
 <img src="figures/DataCleaningTool.png" width="650" height="600">
 
