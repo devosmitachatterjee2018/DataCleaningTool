@@ -53,7 +53,7 @@ DataCleaningTool provides various assistances to users to clean data quickly and
 
 2. **Outlier Detection** - DataCleaningTool can illustrate possible outliers. It can either replace an outlier with a missing observation or delete any row containing outliers.
 
-3. **Missing Data Handling** - DataCleaningTool can illustrate missing observations. It can delete rows or features containing large number of missing observations. It can impute missing observations using missForest method [@Stekhoven:2012]. It shows expected error of imputation for both numerical and categorical features.
+3. **Missing Data Handling** - DataCleaningTool can illustrate missing observations. It can delete rows or features containing large number of missing observations. It can impute missing observations using missForest method [@Stekhoven:2011]. It shows expected error of imputation for both numerical and categorical features.
 
 4. **Encoding** - DataCleaningTool can encode categorical features into numerical equivalents. Both label encoding and one-hot encoding approaches are implemented in the application.
 
