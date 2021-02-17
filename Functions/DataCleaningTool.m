@@ -1,4 +1,4 @@
-classdef DataCleaningTool_exported < matlab.apps.AppBase
+classdef DataCleaningTool < matlab.apps.AppBase
 
     % Properties that correspond to app components
     properties (Access = public)
@@ -4384,7 +4384,7 @@ classdef DataCleaningTool_exported < matlab.apps.AppBase
             
             app.EditField2.Value = 1;
             app.UIAxes8.Visible = 'on';
-            % Tbl an n×p table
+            % Tbl an nÃ—p table
             Tbl = app.UIMainTable.Data;
             varNames = Tbl.Properties.VariableNames;
             
