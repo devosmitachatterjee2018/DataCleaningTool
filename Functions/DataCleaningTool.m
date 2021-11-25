@@ -118,6 +118,8 @@ classdef DataCleaningTool < matlab.apps.AppBase
         UITable2_6                      matlab.ui.control.Table
         UITable2_7                      matlab.ui.control.Table
         UITable2_8                      matlab.ui.control.Table
+        NumberofBinsEditFieldLabel      matlab.ui.control.Label
+        NumberofBinsEditField           matlab.ui.control.NumericEditField
         DatetimeFeaturesTab             matlab.ui.container.Tab
         UIAxes4_3                       matlab.ui.control.UIAxes
         MinEditSliderDatetime           matlab.ui.control.Slider
@@ -175,20 +177,14 @@ classdef DataCleaningTool < matlab.apps.AppBase
         PercentageofMissingDataEditField  matlab.ui.control.NumericEditField
         UIMissingObservationsTable_2    matlab.ui.control.Table
         DeleteFeatureButton_2           matlab.ui.control.Button
-        ExpectedErrorofImputationforNumericalFeaturesEditFieldLabel  matlab.ui.control.Label
-        ExpectedErrorofImputationforNumericalFeaturesEditField  matlab.ui.control.NumericEditField
-        ExpectedErrorofImputationforCategoricalFeaturesEditFieldLabel  matlab.ui.control.Label
-        ExpectedErrorofImputationforCategoricalFeaturesEditField  matlab.ui.control.NumericEditField
         UITable2_14                     matlab.ui.control.Table
         EditField3Label                 matlab.ui.control.Label
         EditFieldWhatsLeft2             matlab.ui.control.NumericEditField
         PercentageofMissingDataImputedEditFieldLabel  matlab.ui.control.Label
         PercentageofMissingDataImputedEditField  matlab.ui.control.NumericEditField
-        ExpectedErrorofImputationforNumericalFeaturesEditField_2Label  matlab.ui.control.Label
-        ExpectedErrorofImputationforNumericalFeaturesEditField_2  matlab.ui.control.NumericEditField
-        ExpectedErrorofImputationforCategoricalFeaturesEditField_2Label  matlab.ui.control.Label
-        ExpectedErrorofImputationforCategoricalFeaturesEditField_2  matlab.ui.control.NumericEditField
-        DatatransformationTab           matlab.ui.container.Tab
+        NumberofTreesEditFieldLabel     matlab.ui.control.Label
+        NumberofTreesEditField          matlab.ui.control.NumericEditField
+        DataTransformationTab           matlab.ui.container.Tab
         TransformButton                 matlab.ui.control.Button
         SelectNumericalFeaturesListBox  matlab.ui.control.ListBox
         SelectedListBox                 matlab.ui.control.ListBox
@@ -198,6 +194,8 @@ classdef DataCleaningTool < matlab.apps.AppBase
         TextArea_12                     matlab.ui.control.TextArea
         transformationEditField         matlab.ui.control.EditField
         DataTransformationErrorEditField  matlab.ui.control.EditField
+        NumberofBinsEditFieldLabel_2    matlab.ui.control.Label
+        NumberofBinsEditField_2         matlab.ui.control.NumericEditField
         SaveDataTab                     matlab.ui.container.Tab
         SaveButton                      matlab.ui.control.Button
         ListBox                         matlab.ui.control.ListBox
@@ -232,26 +230,12 @@ classdef DataCleaningTool < matlab.apps.AppBase
         ResizeButton                    matlab.ui.control.Button
     end
 
-    methods (Access = private)
-        function results = func(app)
-            %%%%%%%%%%%%%%%%%%%%
-            HasRepeatedRows(app, x); % Find the number of duplicate rows
-            HasRepeatedColumns(app, x); % Find the number of duplicate columns
-            GetMissingData(app, x); % Find the missing obervations percentage of each feature
-            GetDuplicateValues(app, x); % Find the number of duplicate observations in each feature
-            GetTable(app, x); % Transform n categories of a text feature into n dummy variables
-            GetTable2(app, x); % Transform n categories of a text feature into n-1 dummy variables
-            GetTable3(app, x, y); % Get label encoding of a text feature
-            GetSimilarityCheck(app, str, x, y); % Get similar categories of a text feature
-            Interpolation(app,noofrows,noofcolumns,missingpercentagetobeimputed,noofnumericalfeatures,noofcategoricalfeatures); % Predict errors using regression
-        end
-    end
+
 
     methods (Access = private)
 
         % Code that executes after component creation
         function startupFcn(app)
-            %%%%%%%%%%%%%%%%%%%%
             screenSize = get(groot,'ScreenSize');
             screenWidth = screenSize(3);
             screenHeight = screenSize(4);
@@ -271,7 +255,6 @@ classdef DataCleaningTool < matlab.apps.AppBase
 
         % Button pushed function: SelectSimilarCategoriesButton
         function SelectSimilarCategoriesButtonPushed(app, event)
-            %%%%%%%%%%%%%%%%%%%%
             % Changes background color to grey
             app.SelectSimilarCategoriesButton.BackgroundColor = [0.65,0.65,0.65];
             pause(0.000001);
@@ -287,7 +270,6 @@ classdef DataCleaningTool < matlab.apps.AppBase
             index_datetime = find(array_datetime==1);
             index_nottext = [index_numeric index_datetime];
             Tbl_text = removevars(Tbl,index_nottext);
-            varNames_text = Tbl_text.Properties.VariableNames;
             t4 = app.UICategoryTextTable.Data;
             app.UITableCategoryText_2.Data = app.UICategoryTextTable.Data;
             
@@ -312,7 +294,7 @@ classdef DataCleaningTool < matlab.apps.AppBase
             end
             app.UIMainTable.Data = Tbl_true;
             
-            %%%%% 1 Current data tab %%%%%
+            % Current data tab
             % Displays the original table with column names
             % Undo
             Tbl_true = app.UIMainTable.Data;
@@ -328,7 +310,6 @@ classdef DataCleaningTool < matlab.apps.AppBase
             app.UndoButton.BackgroundColor = [0.22 0.44 0.55];
             % Update
             Tbl = removevars(Tbl_true,app.IdListBox.Items);
-            varNames = Tbl.Properties.VariableNames;
             if l==0
                 fname1 = sprintf('saveddata/%s_updated.mat', app.EditField_7.Value);
             else
@@ -358,7 +339,7 @@ classdef DataCleaningTool < matlab.apps.AppBase
             varNames_text = Tbl_text.Properties.VariableNames;
             app.TextListBox.Items = string(varNames_text);
             
-            %%%%% 2 Data properties tab %%%%%
+            % Data properties widget
             writetable(Tbl_true,'filesize.csv')
             props = dir('filesize.csv');
             % Displays the file size in megabytes
@@ -381,13 +362,14 @@ classdef DataCleaningTool < matlab.apps.AppBase
             % Displays the number of deleted columns
             app.NumberOfDeletedColumnsEditField.Value = app.ActualNoOfColumnsEditField.Value - size(Tbl_true,2);
             % Missingness plot
-            A = ismissing(Tbl_true);
+            A = flip(ismissing(Tbl_true));
             imagesc(app.UIAxes6,A);
             cmap = winter(2);
             colormap(app.UIAxes7,cmap);
             app.UIAxes6.XTick = 1:length(varNames_true);
             app.UIAxes6.XTickLabel = varNames_true;
             app.UIAxes6.YTick = [1 size(Tbl_true,1)];
+            app.UIAxes6.YTickLabel = {string(size(Tbl_true,1)), '1'};
             app.UIAxes6.YDir = 'normal';
             % Displays the limits of two sliders
             app.DeleteRowsMinSlider.Limits = [1 size(Tbl_true,1)];
@@ -408,7 +390,7 @@ classdef DataCleaningTool < matlab.apps.AppBase
             app.UIAxes5.XTickLabel = varNames_true;
             app.UIAxes5.YLim = [0 100];
             
-            %%%%% 3 Numerical features tab %%%%%
+            % Numerical features widget
             % Descriptive statistics
             if app.NumberOfNumericalFeaturesEditField.Value ~= 0
                 a_numeric = zeros(1,size(Tbl_numeric,2));
@@ -435,16 +417,16 @@ classdef DataCleaningTool < matlab.apps.AppBase
                 app.UINumericTable.Data = {};
             end
             
-            %%%%% 4 Datetime features tab %%%%%
+            % Datetime features widget
             % Descriptive statistics
             if app.NumberOfDateTimeFeaturesEditField.Value ~= 0
-                a_datetime = {};
-                c_datetime = {};
+                a_datetime = cell([1 size(Tbl_datetime,2)]);
+                c_datetime = cell([1 size(Tbl_datetime,2)]);
                 DatesAndTimes = repmat({'Select'},size(Tbl_datetime,2),1);
                 l_datetime = repmat({'Select'},size(Tbl_datetime,2),1);
                 g_datetime = repmat({'Select'},size(Tbl_datetime,2),1);
-                e_datetime = {};
-                f_datetime = {};
+                e_datetime = cell([1 size(Tbl_datetime,2)]);
+                f_datetime = cell([1 size(Tbl_datetime,2)]);
                 for i = 1:size(Tbl_datetime,2)
                     a_datetime{i}=min(Tbl_datetime{:,i});
                     c_datetime{i}=max(Tbl_datetime{:,i});
@@ -461,7 +443,7 @@ classdef DataCleaningTool < matlab.apps.AppBase
                 app.UIDatetimeTable.Data = {};
             end
             
-            %%%%% 5 Text features tab %%%%%
+            % Text features widget
             % Descriptive statistics
             if app.NumberOfTextFeaturesEditField.Value ~= 0
                 a_text = {};
@@ -477,35 +459,26 @@ classdef DataCleaningTool < matlab.apps.AppBase
                 app.UITextTable.Data = {};
             end
             
-            %%%%% 6 Imputation tab %%%%%
+            % Imputation widget
             % Displays missing data percentage to be imputed
             app.PercentageofMissingDataEditField.Value = round((length(find(ismissing(Tbl_true)==1))/numel(Tbl_true))*100,2);
-            noofrows = app.NumberOfRowsEditField.Value;
-            noofcolumns = app.NumberOfColumnsEditField.Value;
-            noofnumericalfeatures = app.NumberOfNumericalFeaturesEditField.Value;
-            noofcategoricalfeatures = app.NumberOfTextFeaturesEditField.Value;
-            missingpercentagetobeimputed = app.PercentageofMissingDataEditField.Value;
-            [NRSME_pred,PEC_pred] = Interpolation(app,noofrows,noofcolumns,missingpercentagetobeimputed,noofnumericalfeatures,noofcategoricalfeatures);
-            % Displays expected error of imputation for numerical features
-            app.ExpectedErrorofImputationforNumericalFeaturesEditField.Value = NRSME_pred;
-            % Displays expected error of imputation for categorical features
-            app.ExpectedErrorofImputationforCategoricalFeaturesEditField.Value = PEC_pred;
             % Missing observations percentage table
             app.UIMissingObservationsTable_2.Data = t;
             % Missingness plot
-            A = ismissing(Tbl_true);
+            A = flip(ismissing(Tbl_true));
             imagesc(app.UIAxes8,A);
             cmap = winter(2);
             colormap(app.UIAxes9,cmap);
             app.UIAxes8.XTick = 1:length(varNames_true);
             app.UIAxes8.XTickLabel = varNames_true;
             app.UIAxes8.YTick = [1 size(Tbl_true,1)];
+            app.UIAxes8.YTickLabel = {string(size(Tbl_true,1)), '1'};
             app.UIAxes8.YDir = 'normal';
             
-            %%%%% 7 Data transformation tab %%%%%
+            % Data transformation widget
             app.SelectNumericalFeaturesListBox.Items = string(varNames_numeric);
             
-            %%plot histogram
+            % Plot histogram
             Tbl = app.UIMainTable.Data;
             T = string(app.SelectedCellTextEditField.Value);
             histogram(app.UIAxes3_3,categorical(Tbl.(T)))
@@ -521,10 +494,9 @@ classdef DataCleaningTool < matlab.apps.AppBase
 
         % Cell selection callback: UINumericTable
         function UINumericTableCellSelection(app, event)
-            %%%%%%%%%%%%%%%%%%%%
             indices = event.Indices;
             
-            %%Numerical Features
+            % Numerical Features
             Tbl_true = app.UIMainTable.Data;
             Tbl = removevars(Tbl_true,app.IdListBox.Items);
             array_numeric = varfun(@isnumeric,Tbl,'output','uniform');
@@ -534,25 +506,29 @@ classdef DataCleaningTool < matlab.apps.AppBase
             app.SelectedCellNumericEditField.Value = string(varNames_numeric(indices(1)));
             
             
-            %%plot histogram and boxplot for the selected feature
+            % Plot histogram and boxplot for the selected feature
             if indices(2) == 1
                 T1 = app.UINumericTable.Data;
                 T = string(T1{indices(1),1});
                 
-                histogram(app.UIAxes,Tbl_numeric.(T))
+                nbins = app.NumberofBinsEditField.Value;
+                if nbins == 0
+                    histogram(app.UIAxes,Tbl_numeric.(T))
+                else
+                    histogram(app.UIAxes,Tbl_numeric.(T),nbins)
+                end
                 app.UIAxes.XLabel.Interpreter = 'latex';
                 app.UIAxes.XLabel.String = T;
                 
                 app.MinEditSliderNumeric.Limits = [min(Tbl_numeric.(T)) max(Tbl_numeric.(T))];
                 app.MaxEditSliderNumeric.Limits = [min(Tbl_numeric.(T)) max(Tbl_numeric.(T))];
-                app.MinEditSliderNumeric.Value = min(Tbl_numeric.(T))
+                app.MinEditSliderNumeric.Value = min(Tbl_numeric.(T));
                 app.MaxEditSliderNumeric.Value = max(Tbl_numeric.(T));
             end
         end
 
         % Cell selection callback: UITextTable
         function UITextTableCellSelection(app, event)
-            %%%%%%%%%%%%%%%%%%%%
             indices = event.Indices;
             
             Tbl_true = app.UIMainTable.Data;
@@ -560,7 +536,6 @@ classdef DataCleaningTool < matlab.apps.AppBase
             array_numeric = varfun(@isnumeric,Tbl,'output','uniform');
             index_notnumeric = find(array_numeric==0);
             Tbl_numeric = removevars(Tbl,index_notnumeric);
-            varNames_numeric = Tbl_numeric.Properties.VariableNames;
             
             array_numeric = varfun(@isnumeric,Tbl,'output','uniform');
             array_datetime = varfun(@isdatetime,Tbl,'output','uniform');
@@ -596,6 +571,9 @@ classdef DataCleaningTool < matlab.apps.AppBase
                 t.b = categorical(t.b,[{'Select'},cat'],'Ordinal',true);
                 app.UICategoryTextTable.Data = t;
                 
+                hb = {};
+                hOutliers = {};
+                yy = {};
                 app.UIBoxplotTextTable.Data = {};
                 for j = 1:app.NumberOfNumericalFeaturesEditField.Value
                     hb{j} = boxplot(app.UIAxes3_5,Tbl_numeric.(string(app.UINumericTable.Data{j,1})),categorical(Tbl_text.(string(varNames_text(indices(1))))),1,'o');
@@ -603,19 +581,16 @@ classdef DataCleaningTool < matlab.apps.AppBase
                     yy{j} = get(hOutliers{j},'YData');
                     y = yy{j};
                     for i = 1:size(y,1)
-                        app.UIBoxplotTextTable.ColumnName = [{'Outliers'} categories(categorical(Tbl_text.(string(varNames_text(indices(1))))))']
-                        app.UIBoxplotTextTable.Data{j,1}= char(string(app.UINumericTable.Data{j,1}))
-                        app.UIBoxplotTextTable.Data{j,i+1}= strjoin(cellstr(num2str(y{i})),',')
+                        app.UIBoxplotTextTable.ColumnName = [{'Outliers'} categories(categorical(Tbl_text.(string(varNames_text(indices(1))))))'];
+                        app.UIBoxplotTextTable.Data{j,1} = char(string(app.UINumericTable.Data{j,1}));
+                        app.UIBoxplotTextTable.Data{j,i+1} = strjoin(cellstr(num2str(y{i})),',');
                     end
                 end
-                
             end
-            
         end
 
         % Button pushed function: ChangeFormatButton
         function ChangeFormatButtonPushed(app, event)
-            %%%%%%%%%%%%%%%%%%%%
             % Changes background color to grey
             app.ChangeFormatButton.BackgroundColor = [0.65,0.65,0.65];
             pause(0.000001);
@@ -644,7 +619,7 @@ classdef DataCleaningTool < matlab.apps.AppBase
             end
             app.UIMainTable.Data = Tbl;
             
-            %%%%% 1 Current data tab %%%%%
+            % Current data widget
             % Displays the original table with column names
             app.UIMainTable.Data = Tbl;
             app.UIMainTable.ColumnName = Tbl.Properties.VariableNames;
@@ -663,7 +638,6 @@ classdef DataCleaningTool < matlab.apps.AppBase
             app.UndoButton.BackgroundColor = [0.22 0.44 0.55];
             % Update
             Tbl = removevars(Tbl_true,app.IdListBox.Items);
-            varNames = Tbl.Properties.VariableNames;
             if l==0
                 fname1 = sprintf('saveddata/%s_updated.mat', app.EditField_7.Value);
             else
@@ -693,12 +667,11 @@ classdef DataCleaningTool < matlab.apps.AppBase
             varNames_text = Tbl_text.Properties.VariableNames;
             app.TextListBox.Items = string(varNames_text);
             
-            %%%%% 2 Data properties tab %%%%%
+            % Data properties widget
             writetable(Tbl_true,'filesize.csv','Delimiter',',')
             props = dir('filesize.csv');
             % Displays the file size in megabytes
             app.FileSizeinMBEditField.Value = round(props.bytes/(1024^2),3);
-            %delete('filesize.csv');
             % Displays the number of rows
             app.NumberOfRowsEditField.Value = size(Tbl_true,1);
             % Displays the number of columns
@@ -716,13 +689,14 @@ classdef DataCleaningTool < matlab.apps.AppBase
             % Displays the number of deleted columns
             app.NumberOfDeletedColumnsEditField.Value = app.ActualNoOfColumnsEditField.Value - size(Tbl_true,2);
             % Missingness plot
-            A = ismissing(Tbl_true);
+            A = flip(ismissing(Tbl_true));
             imagesc(app.UIAxes6,A);
             cmap = winter(2);
             colormap(app.UIAxes7,cmap);
             app.UIAxes6.XTick = 1:length(varNames_true);
             app.UIAxes6.XTickLabel = varNames_true;
             app.UIAxes6.YTick = [1 size(Tbl_true,1)];
+            app.UIAxes6.YTickLabel = {string(size(Tbl_true,1)), '1'};
             app.UIAxes6.YDir = 'normal';
             % Displays the limits of two sliders
             app.DeleteRowsMinSlider.Limits = [1 size(Tbl_true,1)];
@@ -743,7 +717,7 @@ classdef DataCleaningTool < matlab.apps.AppBase
             app.UIAxes5.XTickLabel = varNames_true;
             app.UIAxes5.YLim = [0 100];
             
-            %%%%% 3 Numerical features tab %%%%%
+            % Numerical features widget
             % Descriptive statistics
             if app.NumberOfNumericalFeaturesEditField.Value ~= 0
                 a_numeric = zeros(1,size(Tbl_numeric,2));
@@ -770,16 +744,16 @@ classdef DataCleaningTool < matlab.apps.AppBase
                 app.UINumericTable.Data = {};
             end
             
-            %%%%% 4 Datetime features tab %%%%%
+            % Datetime features widget
             % Descriptive statistics
             if app.NumberOfDateTimeFeaturesEditField.Value ~= 0
-                a_datetime = {};
-                c_datetime = {};
+                a_datetime = cell([1 size(Tbl_datetime,2)]);
+                c_datetime = cell([1 size(Tbl_datetime,2)]);
                 DatesAndTimes = repmat({'Select'},size(Tbl_datetime,2),1);
                 l_datetime = repmat({'Select'},size(Tbl_datetime,2),1);
                 g_datetime = repmat({'Select'},size(Tbl_datetime,2),1);
-                e_datetime = {};
-                f_datetime = {};
+                e_datetime = cell([1 size(Tbl_datetime,2)]);
+                f_datetime = cell([1 size(Tbl_datetime,2)]);
                 for i = 1:size(Tbl_datetime,2)
                     a_datetime{i}=min(Tbl_datetime{:,i});
                     c_datetime{i}=max(Tbl_datetime{:,i});
@@ -796,7 +770,7 @@ classdef DataCleaningTool < matlab.apps.AppBase
                 app.UIDatetimeTable.Data = {};
             end
             
-            %%%%% 5 Text features tab %%%%%
+            % Text features widget
             % Descriptive statistics
             if app.NumberOfTextFeaturesEditField.Value ~= 0
                 a_text = {};
@@ -812,10 +786,10 @@ classdef DataCleaningTool < matlab.apps.AppBase
                 app.UITextTable.Data = {};
             end
             
-            %%%%% 6 Data transformation tab %%%%%
+            % Data transformation widget
             app.SelectNumericalFeaturesListBox.Items = string(varNames_numeric);
             
-            %%%%% 7 Imputation tab %%%%%
+            % Imputation widget
             app.PercentageofMissingDataEditField.Value = round((length(find(ismissing(Tbl_true)==1))/numel(Tbl_true))*100,2);
             
             % Last modified time
@@ -827,11 +801,10 @@ classdef DataCleaningTool < matlab.apps.AppBase
 
         % Callback function
         function UpdateRangeButtonDatetimePushed(app, event)
-            %%%%%%%%%%%%%%%%%%%%
             % Changes background color to grey
             app.UpdateRangeButtonDatetime.BackgroundColor = [0.65,0.65,0.65];
             
-            %%%%% 1 Update range %%%%%
+            % 1 Update range %
             Tbl = app.UIMainTable.Data;
             array_datetime = varfun(@isdatetime,Tbl,'output','uniform');
             index_datetime = find(array_datetime==1);
@@ -855,7 +828,7 @@ classdef DataCleaningTool < matlab.apps.AppBase
                 Tbl{indices0{i},index_datetime(i)} = NaT(length(indices0{i}),1);
             end
             
-            %%%%% 2 Present table %%%%%
+            % 2 Present table %
             % Displays the original table with column names
             app.UIMainTable.Data = Tbl;
             app.UIMainTable.ColumnName = Tbl.Properties.VariableNames;
@@ -883,7 +856,7 @@ classdef DataCleaningTool < matlab.apps.AppBase
             Tbl_text = removevars(Tbl,index_nottext);
             varNames_text = Tbl_text.Properties.VariableNames;
             
-            %%%%% 3 Data properties %%%%%
+            % 3 Data properties %
             fullname = app.ImportDataEditField.Value;
             props = dir(fullname);
             % Displays the file size in megabytes
@@ -903,21 +876,20 @@ classdef DataCleaningTool < matlab.apps.AppBase
             % Displays the number of duplicate columns
             app.NumberOfDuplicateColumnsEditField.Value = HasRepeatedColumns(app, Tbl_numeric);
             % Missingness plot
-            A = ismissing(Tbl);
+            A = flip(ismissing(Tbl));
             imagesc(app.UIAxes6,A);
             cmap = parula(2);
             colormap(app.UIAxes7,cmap);
-            %colorbar(app.UIAxes7,'westoutside','FontSize',8,'Limits',[0 1],'Ticks',[0.05,0.95],'TickLabels',{'Observed','Missing'})
             app.UIAxes6.XTick = 1:length(varNames);
             app.UIAxes6.XTickLabel = varNames;
-            app.UIAxes6.YTick = 0:500:size(Tbl,1);
-            app.UIAxes6.YTickLabel = 0:500:size(Tbl,1);
+            app.UIAxes6.YTick = [1 size(Tbl,1)];
+            app.UIAxes6.YTickLabel = {string(size(Tbl,1)), '1'};
             app.UIAxes6.YDir = 'normal';
             
-            %%%%% 4 Numerical features tab %%%%%
+            % Numerical features widget
             % Descriptive statistics
             if app.NumberOfNumericalFeaturesEditField.Value ~= 0
-                %% Numerical features tab
+                % Numerical features tab
                 a_numeric = zeros(1,size(Tbl_numeric,2));
                 c_numeric = zeros(1,size(Tbl_numeric,2));
                 d_numeric = zeros(1,size(Tbl_numeric,2));
@@ -940,16 +912,16 @@ classdef DataCleaningTool < matlab.apps.AppBase
                 app.UINumericTable.Data = t1;
             end
             
-            %%%%% 5 Datetime features tab %%%%%
+            % Datetime features widget
             if app.NumberOfDateTimeFeaturesEditField.Value ~= 0
-                %% Date/time features tab
-                a_datetime = {};
-                c_datetime = {};
+                % Date/time features tab
+                a_datetime = cell([1 size(Tbl_datetime,2)]);
+                c_datetime = cell([1 size(Tbl_datetime,2)]);
                 DatesAndTimes = repmat({'Select'},size(Tbl_datetime,2),1);
                 l_datetime = repmat({'Select'},size(Tbl_datetime,2),1);
                 g_datetime = repmat({'Select'},size(Tbl_datetime,2),1);
-                e_datetime = {};
-                f_datetime = {};
+                e_datetime = cell([1 size(Tbl_datetime,2)]);
+                f_datetime = cell([1 size(Tbl_datetime,2)]);
                 for i = 1:size(Tbl_datetime,2)
                     a_datetime{i}=min(Tbl_datetime{:,i});
                     c_datetime{i}=max(Tbl_datetime{:,i});
@@ -964,9 +936,9 @@ classdef DataCleaningTool < matlab.apps.AppBase
                 app.UIDatetimeTable.Data = t2;
             end
             
-            %%%%% 6 Text features tab %%%%%
+            % Text features widget
             if app.NumberOfTextFeaturesEditField.Value ~= 0
-                %% Text features tab
+                % Text features tab
                 % Displays the numerical feature in List Box
                 a_text = {};
                 b_text = {};
@@ -979,7 +951,7 @@ classdef DataCleaningTool < matlab.apps.AppBase
                 app.UITextTable.Data = t3;
             end
             
-            %%%%% 7 What's left tab %%%%%
+            % What's left widget
             % Table 1
             Tbl = app.UIMainTable.Data;
             varNames = Tbl.Properties.VariableNames;
@@ -993,7 +965,7 @@ classdef DataCleaningTool < matlab.apps.AppBase
             app.UIAxes5.YTick = 0:5:100;
             app.UIAxes5.YTickLabel = 0:5:100;
             
-            % plots updated histogram of the selected cell
+            % Plots updated histogram of the selected cell
             T = app.SelectedCellDatetimeEditField.Value;
             histogram(app.UIAxes4_3,Tbl_datetime.(T))
             app.UIAxes4_3.XLabel.Interpreter = 'latex';
@@ -1007,7 +979,6 @@ classdef DataCleaningTool < matlab.apps.AppBase
 
         % Cell selection callback: UIDatetimeTable
         function UIDatetimeTableCellSelection(app, event)
-            %%%%%%%%%%%%%%%%%%%%
             indices = event.Indices;
             
             Tbl_true = app.UIMainTable.Data;
@@ -1037,10 +1008,9 @@ classdef DataCleaningTool < matlab.apps.AppBase
 
         % Value changed function: MinEditSliderDatetime
         function MinEditSliderDatetimeValueChanged(app, event)
-            %%%%%%%%%%%%%%%%%%%%
             value = app.MinEditSliderDatetime.Value;
             
-            %%Datetime features
+            % Datetime features
             Tbl_true = app.UIMainTable.Data;
             Tbl = removevars(Tbl_true,app.IdListBox.Items);
             array_datetime = varfun(@isdatetime,Tbl,'output','uniform');
@@ -1059,10 +1029,9 @@ classdef DataCleaningTool < matlab.apps.AppBase
 
         % Value changed function: MaxEditSliderDatetime
         function MaxEditSliderDatetimeValueChanged(app, event)
-            %%%%%%%%%%%%%%%%%%%%
             value = app.MaxEditSliderDatetime.Value;
             
-            %%Datetime features
+            % Datetime features
             Tbl_true = app.UIMainTable.Data;
             Tbl = removevars(Tbl_true,app.IdListBox.Items);
             array_datetime = varfun(@isdatetime,Tbl,'output','uniform');
@@ -1081,10 +1050,9 @@ classdef DataCleaningTool < matlab.apps.AppBase
 
         % Value changed function: MinEditSliderNumeric
         function MinEditSliderNumericValueChanged(app, event)
-            %%%%%%%%%%%%%%%%%%%%
             value = app.MinEditSliderNumeric.Value;
             
-            %%Numerical features
+            % Numerical features
             Tbl_true = app.UIMainTable.Data;
             Tbl = removevars(Tbl_true,app.IdListBox.Items);
             array_numeric = varfun(@isnumeric,Tbl,'output','uniform');
@@ -1097,10 +1065,9 @@ classdef DataCleaningTool < matlab.apps.AppBase
 
         % Value changed function: MaxEditSliderNumeric
         function MaxEditSliderNumericValueChanged(app, event)
-            %%%%%%%%%%%%%%%%%%%%
             value = app.MaxEditSliderNumeric.Value;
             
-            %%Numerical features
+            % Numerical features
             Tbl_true = app.UIMainTable.Data;
             Tbl = removevars(Tbl_true,app.IdListBox.Items);
             array_numeric = varfun(@isnumeric,Tbl,'output','uniform');
@@ -1113,7 +1080,6 @@ classdef DataCleaningTool < matlab.apps.AppBase
 
         % Button pushed function: SaveButton
         function SaveButtonPushed(app, event)
-            %%%%%%%%%%%%%%%%%%%%
             % Changes background color to grey
             app.SaveButton.BackgroundColor = [0.65,0.65,0.65];
             pause(0.000001);
@@ -1147,7 +1113,6 @@ classdef DataCleaningTool < matlab.apps.AppBase
 
         % Button pushed function: RemoveObservationsNumericButton
         function RemoveObservationsNumericButtonPushed(app, event)
-            %%%%%%%%%%%%%%%%%%%%
             % Changes background color to grey
             app.RemoveObservationsNumericButton.BackgroundColor = [0.65,0.65,0.65];
             pause(0.000001);
@@ -1258,7 +1223,7 @@ classdef DataCleaningTool < matlab.apps.AppBase
             end
             app.UIMainTable.Data = Tbl_true;
             
-            %%%%% 1 Current data tab %%%%%
+            % Current data widget
             % Displays the original table with column names
             % Undo
             Tbl_true = app.UIMainTable.Data;
@@ -1274,7 +1239,6 @@ classdef DataCleaningTool < matlab.apps.AppBase
             app.UndoButton.BackgroundColor = [0.22 0.44 0.55];
             % Update
             Tbl = removevars(Tbl_true,app.IdListBox.Items);
-            varNames = Tbl.Properties.VariableNames;
             if l==0
                 fname1 = sprintf('saveddata/%s_updated.mat', app.EditField_7.Value);
             else
@@ -1304,7 +1268,7 @@ classdef DataCleaningTool < matlab.apps.AppBase
             varNames_text = Tbl_text.Properties.VariableNames;
             app.TextListBox.Items = string(varNames_text);
             
-            %%%%% 2 Data properties tab %%%%%
+            % Data properties tab
             writetable(Tbl_true,'filesize.csv')
             props = dir('filesize.csv');
             % Displays the file size in megabytes
@@ -1327,13 +1291,14 @@ classdef DataCleaningTool < matlab.apps.AppBase
             % Displays the number of deleted columns
             app.NumberOfDeletedColumnsEditField.Value = app.ActualNoOfColumnsEditField.Value - size(Tbl_true,2);
             % Missingness plot
-            A = ismissing(Tbl_true);
+            A = flip(ismissing(Tbl_true));
             imagesc(app.UIAxes6,A);
             cmap = winter(2);
             colormap(app.UIAxes7,cmap);
             app.UIAxes6.XTick = 1:length(varNames_true);
             app.UIAxes6.XTickLabel = varNames_true;
             app.UIAxes6.YTick = [1 size(Tbl_true,1)];
+            app.UIAxes6.YTickLabel = {string(size(Tbl_true,1)), '1'};
             app.UIAxes6.YDir = 'normal';
             % Displays the limits of two sliders
             app.DeleteRowsMinSlider.Limits = [1 size(Tbl_true,1)];
@@ -1354,7 +1319,7 @@ classdef DataCleaningTool < matlab.apps.AppBase
             app.UIAxes5.XTickLabel = varNames_true;
             app.UIAxes5.YLim = [0 100];
             
-            %%%%% 3 Numerical features tab %%%%%
+            % Numerical features widget
             % Descriptive statistics
             if app.NumberOfNumericalFeaturesEditField.Value ~= 0
                 a_numeric = zeros(1,size(Tbl_numeric,2));
@@ -1381,16 +1346,16 @@ classdef DataCleaningTool < matlab.apps.AppBase
                 app.UINumericTable.Data = {};
             end
             
-            %%%%% 4 Datetime features tab %%%%%
+            % Datetime features tab
             % Descriptive statistics
             if app.NumberOfDateTimeFeaturesEditField.Value ~= 0
-                a_datetime = {};
-                c_datetime = {};
+                a_datetime = cell([1 size(Tbl_datetime,2)]);
+                c_datetime = cell([1 size(Tbl_datetime,2)]);
                 DatesAndTimes = repmat({'Select'},size(Tbl_datetime,2),1);
                 l_datetime = repmat({'Select'},size(Tbl_datetime,2),1);
                 g_datetime = repmat({'Select'},size(Tbl_datetime,2),1);
-                e_datetime = {};
-                f_datetime = {};
+                e_datetime = cell([1 size(Tbl_datetime,2)]);
+                f_datetime = cell([1 size(Tbl_datetime,2)]);
                 for i = 1:size(Tbl_datetime,2)
                     a_datetime{i}=min(Tbl_datetime{:,i});
                     c_datetime{i}=max(Tbl_datetime{:,i});
@@ -1407,7 +1372,7 @@ classdef DataCleaningTool < matlab.apps.AppBase
                 app.UIDatetimeTable.Data = {};
             end
             
-            %%%%% 5 Text features tab %%%%%
+            % Text features widget
             % Descriptive statistics
             if app.NumberOfTextFeaturesEditField.Value ~= 0
                 a_text = {};
@@ -1423,38 +1388,34 @@ classdef DataCleaningTool < matlab.apps.AppBase
                 app.UITextTable.Data = {};
             end
             
-            %%%%% 6 Imputation tab %%%%%
+            % Imputation widget
             % Displays missing data percentage to be imputed
             app.PercentageofMissingDataEditField.Value = round((length(find(ismissing(Tbl_true)==1))/numel(Tbl_true))*100,2);
-            noofrows = app.NumberOfRowsEditField.Value;
-            noofcolumns = app.NumberOfColumnsEditField.Value;
-            noofnumericalfeatures = app.NumberOfNumericalFeaturesEditField.Value;
-            noofcategoricalfeatures = app.NumberOfTextFeaturesEditField.Value;
-            missingpercentagetobeimputed = app.PercentageofMissingDataEditField.Value;
-            [NRSME_pred,PEC_pred] = Interpolation(app,noofrows,noofcolumns,missingpercentagetobeimputed,noofnumericalfeatures,noofcategoricalfeatures);
-            % Displays expected error of imputation for numerical features
-            app.ExpectedErrorofImputationforNumericalFeaturesEditField.Value = NRSME_pred;
-            % Displays expected error of imputation for categorical features
-            app.ExpectedErrorofImputationforCategoricalFeaturesEditField.Value = PEC_pred;
             % Missing observations percentage table
             app.UIMissingObservationsTable_2.Data = t;
             % Missingness plot
-            A = ismissing(Tbl_true);
+            A = flip(ismissing(Tbl_true));
             imagesc(app.UIAxes8,A);
             cmap = winter(2);
             colormap(app.UIAxes9,cmap);
             app.UIAxes8.XTick = 1:length(varNames_true);
             app.UIAxes8.XTickLabel = varNames_true;
             app.UIAxes8.YTick = [1 size(Tbl_true,1)];
+            app.UIAxes8.YTickLabel = {string(size(Tbl_true,1)), '1'};
             app.UIAxes8.YDir = 'normal';
             
-            %%%%% 7 Data transformation tab %%%%%
+            % Data transformation widget
             app.SelectNumericalFeaturesListBox.Items = string(varNames_numeric);
             
-            % plots updated histogram of the selected cell
+            % Plots updated histogram of the selected cell
             if isempty(app.SelectedCellNumericEditField.Value) == false
                 T = app.SelectedCellNumericEditField.Value;
-                histogram(app.UIAxes,Tbl_numeric.(T))
+                nbins = app.NumberofBinsEditField.Value;
+                if nbins == 0
+                    histogram(app.UIAxes,Tbl_numeric.(T))
+                else
+                    histogram(app.UIAxes,Tbl_numeric.(T),nbins)
+                end
                 app.UIAxes.XLabel.Interpreter = 'latex';
                 app.UIAxes.XLabel.String = T;
                 
@@ -1473,7 +1434,6 @@ classdef DataCleaningTool < matlab.apps.AppBase
 
         % Button pushed function: RemoveObservationsDatetimeButton
         function RemoveObservationsDatetimeButtonPushed(app, event)
-            %%%%%%%%%%%%%%%%%%%%
             % Changes background color to grey
             app.RemoveObservationsDatetimeButton.BackgroundColor = [0.65,0.65,0.65];
             pause(0.000001);
@@ -1584,7 +1544,7 @@ classdef DataCleaningTool < matlab.apps.AppBase
             end
             app.UIMainTable.Data = Tbl_true;
             
-            %%%%% 1 Current data tab %%%%%
+            % Current data widget
             % Displays the original table with column names
             % Undo
             Tbl_true = app.UIMainTable.Data;
@@ -1600,7 +1560,6 @@ classdef DataCleaningTool < matlab.apps.AppBase
             app.UndoButton.BackgroundColor = [0.22 0.44 0.55];
             % Update
             Tbl = removevars(Tbl_true,app.IdListBox.Items);
-            varNames = Tbl.Properties.VariableNames;
             if l==0
                 fname1 = sprintf('saveddata/%s_updated.mat', app.EditField_7.Value);
             else
@@ -1630,7 +1589,7 @@ classdef DataCleaningTool < matlab.apps.AppBase
             varNames_text = Tbl_text.Properties.VariableNames;
             app.TextListBox.Items = string(varNames_text);
             
-            %%%%% 2 Data properties tab %%%%%
+            % Data properties widget
             writetable(Tbl_true,'filesize.csv')
             props = dir('filesize.csv');
             % Displays the file size in megabytes
@@ -1653,13 +1612,14 @@ classdef DataCleaningTool < matlab.apps.AppBase
             % Displays the number of deleted columns
             app.NumberOfDeletedColumnsEditField.Value = app.ActualNoOfColumnsEditField.Value - size(Tbl_true,2);
             % Missingness plot
-            A = ismissing(Tbl_true);
+            A = flip(ismissing(Tbl_true));
             imagesc(app.UIAxes6,A);
             cmap = winter(2);
             colormap(app.UIAxes7,cmap);
             app.UIAxes6.XTick = 1:length(varNames_true);
             app.UIAxes6.XTickLabel = varNames_true;
             app.UIAxes6.YTick = [1 size(Tbl_true,1)];
+            app.UIAxes6.YTickLabel = {string(size(Tbl_true,1)), '1'};
             app.UIAxes6.YDir = 'normal';
             % Displays the limits of two sliders
             app.DeleteRowsMinSlider.Limits = [1 size(Tbl_true,1)];
@@ -1680,7 +1640,7 @@ classdef DataCleaningTool < matlab.apps.AppBase
             app.UIAxes5.XTickLabel = varNames_true;
             app.UIAxes5.YLim = [0 100];
             
-            %%%%% 3 Numerical features tab %%%%%
+            % Numerical features widget
             % Descriptive statistics
             if app.NumberOfNumericalFeaturesEditField.Value ~= 0
                 a_numeric = zeros(1,size(Tbl_numeric,2));
@@ -1707,16 +1667,16 @@ classdef DataCleaningTool < matlab.apps.AppBase
                 app.UINumericTable.Data = {};
             end
             
-            %%%%% 4 Datetime features tab %%%%%
+            % Datetime features widget
             % Descriptive statistics
             if app.NumberOfDateTimeFeaturesEditField.Value ~= 0
-                a_datetime = {};
-                c_datetime = {};
+                a_datetime = cell([1 size(Tbl_datetime,2)]);
+                c_datetime = cell([1 size(Tbl_datetime,2)]);
                 DatesAndTimes = repmat({'Select'},size(Tbl_datetime,2),1);
                 l_datetime = repmat({'Select'},size(Tbl_datetime,2),1);
                 g_datetime = repmat({'Select'},size(Tbl_datetime,2),1);
-                e_datetime = {};
-                f_datetime = {};
+                e_datetime = cell([1 size(Tbl_datetime,2)]);
+                f_datetime = cell([1 size(Tbl_datetime,2)]);
                 for i = 1:size(Tbl_datetime,2)
                     a_datetime{i}=min(Tbl_datetime{:,i});
                     c_datetime{i}=max(Tbl_datetime{:,i});
@@ -1733,7 +1693,7 @@ classdef DataCleaningTool < matlab.apps.AppBase
                 app.UIDatetimeTable.Data = {};
             end
             
-            %%%%% 5 Text features tab %%%%%
+            % Text features widget
             % Descriptive statistics
             if app.NumberOfTextFeaturesEditField.Value ~= 0
                 a_text = {};
@@ -1749,35 +1709,26 @@ classdef DataCleaningTool < matlab.apps.AppBase
                 app.UITextTable.Data = {};
             end
             
-            %%%%% 6 Imputation tab %%%%%
+            % Imputation widget
             % Displays missing data percentage to be imputed
             app.PercentageofMissingDataEditField.Value = round((length(find(ismissing(Tbl_true)==1))/numel(Tbl_true))*100,2);
-            noofrows = app.NumberOfRowsEditField.Value;
-            noofcolumns = app.NumberOfColumnsEditField.Value;
-            noofnumericalfeatures = app.NumberOfNumericalFeaturesEditField.Value;
-            noofcategoricalfeatures = app.NumberOfTextFeaturesEditField.Value;
-            missingpercentagetobeimputed = app.PercentageofMissingDataEditField.Value;
-            [NRSME_pred,PEC_pred] = Interpolation(app,noofrows,noofcolumns,missingpercentagetobeimputed,noofnumericalfeatures,noofcategoricalfeatures);
-            % Displays expected error of imputation for numerical features
-            app.ExpectedErrorofImputationforNumericalFeaturesEditField.Value = NRSME_pred;
-            % Displays expected error of imputation for categorical features
-            app.ExpectedErrorofImputationforCategoricalFeaturesEditField.Value = PEC_pred;
             % Missing observations percentage table
             app.UIMissingObservationsTable_2.Data = t;
             % Missingness plot
-            A = ismissing(Tbl_true);
+            A = flip(ismissing(Tbl_true));
             imagesc(app.UIAxes8,A);
             cmap = winter(2);
             colormap(app.UIAxes9,cmap);
             app.UIAxes8.XTick = 1:length(varNames_true);
             app.UIAxes8.XTickLabel = varNames_true;
             app.UIAxes8.YTick = [1 size(Tbl_true,1)];
+            app.UIAxes8.YTickLabel = {string(size(Tbl_true,1)), '1'};
             app.UIAxes8.YDir = 'normal';
             
-            %%%%% 7 Data transformation tab %%%%%
+            % Data transformation tab
             app.SelectNumericalFeaturesListBox.Items = string(varNames_numeric);
             
-            % plots updated histogram of the selected cell
+            % Plots updated histogram of the selected cell
             T = app.SelectedCellDatetimeEditField.Value;
             histogram(app.UIAxes4_3,Tbl_datetime.(T))
             app.UIAxes4_3.XLabel.Interpreter = 'latex';
@@ -1797,7 +1748,6 @@ classdef DataCleaningTool < matlab.apps.AppBase
 
         % Button pushed function: DeleteRowsNumericButton
         function DeleteRowsNumericButtonPushed(app, event)
-            %%%%%%%%%%%%%%%%%%%%
             % Changes background color to grey
             app.DeleteRowsNumericButton.BackgroundColor = [0.65,0.65,0.65];
             pause(0.000001);
@@ -1808,7 +1758,6 @@ classdef DataCleaningTool < matlab.apps.AppBase
             Tbl = removevars(Tbl_true,app.IdListBox.Items);
             varNames = Tbl.Properties.VariableNames;
             array_numeric = varfun(@isnumeric,Tbl,'output','uniform');
-            index_numeric = find(array_numeric==1);
             index_notnumeric = find(array_numeric==0);
             Tbl_numeric = removevars(Tbl,index_notnumeric);
             varNames_numeric = Tbl_numeric.Properties.VariableNames;
@@ -1853,7 +1802,6 @@ classdef DataCleaningTool < matlab.apps.AppBase
             Tbl = removevars(Tbl_true,app.IdListBox.Items);
             varNames = Tbl.Properties.VariableNames;
             array_numeric = varfun(@isnumeric,Tbl,'output','uniform');
-            index_numeric = find(array_numeric==1);
             index_notnumeric = find(array_numeric==0);
             Tbl_numeric = removevars(Tbl,index_notnumeric);
             varNames_numeric = Tbl_numeric.Properties.VariableNames;
@@ -1898,7 +1846,6 @@ classdef DataCleaningTool < matlab.apps.AppBase
             Tbl = removevars(Tbl_true,app.IdListBox.Items);
             varNames = Tbl.Properties.VariableNames;
             array_numeric = varfun(@isnumeric,Tbl,'output','uniform');
-            index_numeric = find(array_numeric==1);
             index_notnumeric = find(array_numeric==0);
             Tbl_numeric = removevars(Tbl,index_notnumeric);
             varNames_numeric = Tbl_numeric.Properties.VariableNames;
@@ -1927,7 +1874,7 @@ classdef DataCleaningTool < matlab.apps.AppBase
             end
             app.UIMainTable.Data = Tbl_true;
             
-            %%%%% 1 Current data tab %%%%%
+            % Current data widget
             % Displays the original table with column names
             % Undo
             Tbl_true = app.UIMainTable.Data;
@@ -1973,7 +1920,7 @@ classdef DataCleaningTool < matlab.apps.AppBase
             varNames_text = Tbl_text.Properties.VariableNames;
             app.TextListBox.Items = string(varNames_text);
             
-            %%%%% 2 Data properties tab %%%%%
+            % Data properties widget
             writetable(Tbl_true,'filesize.csv')
             props = dir('filesize.csv');
             % Displays the file size in megabytes
@@ -1996,13 +1943,14 @@ classdef DataCleaningTool < matlab.apps.AppBase
             % Displays the number of deleted columns
             app.NumberOfDeletedColumnsEditField.Value = app.ActualNoOfColumnsEditField.Value - size(Tbl_true,2);
             % Missingness plot
-            A = ismissing(Tbl_true);
+            A = flip(ismissing(Tbl_true));
             imagesc(app.UIAxes6,A);
             cmap = winter(2);
             colormap(app.UIAxes7,cmap);
             app.UIAxes6.XTick = 1:length(varNames_true);
             app.UIAxes6.XTickLabel = varNames_true;
             app.UIAxes6.YTick = [1 size(Tbl_true,1)];
+            app.UIAxes6.YTickLabel = {string(size(Tbl_true,1)), '1'};
             app.UIAxes6.YDir = 'normal';
             % Displays the limits of two sliders
             app.DeleteRowsMinSlider.Limits = [1 size(Tbl_true,1)];
@@ -2041,7 +1989,7 @@ classdef DataCleaningTool < matlab.apps.AppBase
             % Displays the number of deleted rows
             app.NumberOfDeletedRowsEditField.Value = app.ActualNoOfRowsEditField.Value - size(Tbl_true,1);
             
-            %%%%% 3 Numerical features tab %%%%%
+            % Numerical features widget
             % Descriptive statistics
             if app.NumberOfNumericalFeaturesEditField.Value ~= 0
                 a_numeric = zeros(1,size(Tbl_numeric,2));
@@ -2068,16 +2016,16 @@ classdef DataCleaningTool < matlab.apps.AppBase
                 app.UINumericTable.Data = {};
             end
             
-            %%%%% 4 Datetime features tab %%%%%
+            % Datetime features widget
             % Descriptive statistics
             if app.NumberOfDateTimeFeaturesEditField.Value ~= 0
-                a_datetime = {};
-                c_datetime = {};
+                a_datetime = cell([1 size(Tbl_datetime,2)]);
+                c_datetime = cell([1 size(Tbl_datetime,2)]);
                 DatesAndTimes = repmat({'Select'},size(Tbl_datetime,2),1);
                 l_datetime = repmat({'Select'},size(Tbl_datetime,2),1);
                 g_datetime = repmat({'Select'},size(Tbl_datetime,2),1);
-                e_datetime = {};
-                f_datetime = {};
+                e_datetime = cell([1 size(Tbl_datetime,2)]);
+                f_datetime = cell([1 size(Tbl_datetime,2)]);
                 for i = 1:size(Tbl_datetime,2)
                     a_datetime{i}=min(Tbl_datetime{:,i});
                     c_datetime{i}=max(Tbl_datetime{:,i});
@@ -2094,7 +2042,7 @@ classdef DataCleaningTool < matlab.apps.AppBase
                 app.UIDatetimeTable.Data = {};
             end
             
-            %%%%% 5 Text features tab %%%%%
+            % Text features widget
             % Descriptive statistics
             if app.NumberOfTextFeaturesEditField.Value ~= 0
                 a_text = {};
@@ -2110,38 +2058,34 @@ classdef DataCleaningTool < matlab.apps.AppBase
                 app.UITextTable.Data = {};
             end
             
-            %%%%% 6 Imputation tab %%%%%
+            % Imputation widget
             % Displays missing data percentage to be imputed
             app.PercentageofMissingDataEditField.Value = round((length(find(ismissing(Tbl_true)==1))/numel(Tbl_true))*100,2);
-            noofrows = app.NumberOfRowsEditField.Value;
-            noofcolumns = app.NumberOfColumnsEditField.Value;
-            noofnumericalfeatures = app.NumberOfNumericalFeaturesEditField.Value;
-            noofcategoricalfeatures = app.NumberOfTextFeaturesEditField.Value;
-            missingpercentagetobeimputed = app.PercentageofMissingDataEditField.Value;
-            [NRSME_pred,PEC_pred] = Interpolation(app,noofrows,noofcolumns,missingpercentagetobeimputed,noofnumericalfeatures,noofcategoricalfeatures);
-            % Displays expected error of imputation for numerical features
-            app.ExpectedErrorofImputationforNumericalFeaturesEditField.Value = NRSME_pred;
-            % Displays expected error of imputation for categorical features
-            app.ExpectedErrorofImputationforCategoricalFeaturesEditField.Value = PEC_pred;
             % Missing observations percentage table
             app.UIMissingObservationsTable_2.Data = t;
             % Missingness plot
-            A = ismissing(Tbl_true);
+            A = flip(ismissing(Tbl_true));
             imagesc(app.UIAxes8,A);
             cmap = winter(2);
             colormap(app.UIAxes9,cmap);
             app.UIAxes8.XTick = 1:length(varNames_true);
             app.UIAxes8.XTickLabel = varNames_true;
             app.UIAxes8.YTick = [1 size(Tbl_true,1)];
+            app.UIAxes8.YTickLabel = {string(size(Tbl_true,1)), '1'};
             app.UIAxes8.YDir = 'normal';
             
-            %%%%% 7 Data transformation tab %%%%%
+            % Data transformation widget
             app.SelectNumericalFeaturesListBox.Items = string(varNames_numeric);
             
-            % plots updated histogram of the selected cell
+            % Plots updated histogram of the selected cell
             if isempty(app.SelectedCellNumericEditField.Value) == false
                 T = app.SelectedCellNumericEditField.Value;
-                histogram(app.UIAxes,Tbl_numeric.(T))
+                nbins = app.NumberofBinsEditField.Value;
+                if nbins == 0
+                    histogram(app.UIAxes,Tbl_numeric.(T))
+                else
+                    histogram(app.UIAxes,Tbl_numeric.(T),nbins)
+                end
                 app.UIAxes.XLabel.Interpreter = 'latex';
                 app.UIAxes.XLabel.String = T;
                 
@@ -2160,17 +2104,15 @@ classdef DataCleaningTool < matlab.apps.AppBase
 
         % Cell edit callback: UITableNumericRowsDeleted
         function UITableNumericRowsDeletedCellEdit(app, event)
-            %%%%%%%%%%%%%%%%%%%%
             indices = event.Indices;
             newData = event.NewData;
         end
 
         % Cell edit callback: UITableDatetimeRowsDeleted
         function UITableDatetimeRowsDeletedCellEdit(app, event)
-            %%%%%%%%%%%%%%%%%%%%
             indices = event.Indices;
             newData = event.NewData;
-            %%Date/time features
+            % Date/time features
             array_datetime = varfun(@isdatetime,Tbl,'output','uniform');
             index_notdatetime = find(array_datetime==0);
             Tbl_datetime = removevars(Tbl,index_notdatetime);
@@ -2181,7 +2123,6 @@ classdef DataCleaningTool < matlab.apps.AppBase
 
         % Cell selection callback: UIBoxplotTextTable
         function UIBoxplotTextTableCellSelection(app, event)
-            %%%%%%%%%%%%%%%%%%%%
             indices = event.Indices;
             
             Tbl_true = app.UIMainTable.Data;
@@ -2197,12 +2138,9 @@ classdef DataCleaningTool < matlab.apps.AppBase
             index_datetime = find(array_datetime==1);
             index_nottext = [index_numeric index_datetime];
             Tbl_text = removevars(Tbl,index_nottext);
-            varNames_text = Tbl_text.Properties.VariableNames;
             if indices(2) ~= 1
                 app.UITableTextRowIndices.Data{indices(1),indices(2)-1} = indices(1);
                 app.UITableTextColumnIndices.Data{indices(1),indices(2)-1} = indices(2);
-                
-                t = app.UIBoxplotTextTable.Data;
                 
                 rowIndex = indices(1);
                 colIndex = indices(2);
@@ -2218,7 +2156,7 @@ classdef DataCleaningTool < matlab.apps.AppBase
                     app.UITableTextRowsDeleted.Data{rowIndex,colIndex-1} = length(indices);
                 end
             else
-                hb = boxplot(app.UIAxes3_4,Tbl_numeric.(string(app.UINumericTable.Data{indices(1),1})),categorical(Tbl_text.(string(app.SelectedCellTextEditField.Value))),1,'*');
+                boxplot(app.UIAxes3_4,Tbl_numeric.(string(app.UINumericTable.Data{indices(1),1})),categorical(Tbl_text.(string(app.SelectedCellTextEditField.Value))),1,'*');
                 app.UIAxes3_4.XLabel.Interpreter = 'latex';
                 app.UIAxes3_4.XLabel.String = app.SelectedCellTextEditField.Value;
                 app.UIAxes3_4.YLabel.Interpreter = 'latex';
@@ -2228,7 +2166,6 @@ classdef DataCleaningTool < matlab.apps.AppBase
 
         % Button pushed function: RemoveObservationsTextButton
         function RemoveObservationsTextButtonPushed(app, event)
-            %%%%%%%%%%%%%%%%%%%%
             % Changes background color to grey
             app.RemoveObservationsTextButton.BackgroundColor = [0.65,0.65,0.65];
             pause(0.000001);
@@ -2267,7 +2204,7 @@ classdef DataCleaningTool < matlab.apps.AppBase
             end
             app.UITableTextRowIndices.Data = {};
             app.UITableTextColumnIndices.Data = {};
-            %%%%% 1 Current data tab %%%%%
+            % Current data widget
             % Displays the original table with column names
             
             % Undo
@@ -2284,7 +2221,6 @@ classdef DataCleaningTool < matlab.apps.AppBase
             app.UndoButton.BackgroundColor = [0.22 0.44 0.55];
             % Update
             Tbl = removevars(Tbl_true,app.IdListBox.Items);
-            varNames = Tbl.Properties.VariableNames;
             if l==0
                 fname1 = sprintf('saveddata/%s_updated.mat', app.EditField_7.Value);
             else
@@ -2314,7 +2250,7 @@ classdef DataCleaningTool < matlab.apps.AppBase
             varNames_text = Tbl_text.Properties.VariableNames;
             app.TextListBox.Items = string(varNames_text);
             
-            %%%%% 2 Data properties %%%%%
+            % 2 Data properties %
             writetable(Tbl_true,'filesize.csv')
             props = dir('filesize.csv');
             % Displays the file size in megabytes
@@ -2337,13 +2273,14 @@ classdef DataCleaningTool < matlab.apps.AppBase
             % Displays the number of deleted columns
             app.NumberOfDeletedColumnsEditField.Value = app.ActualNoOfColumnsEditField.Value - size(Tbl_true,2);
             % Missingness plot
-            A = ismissing(Tbl_true);
+            A = flip(ismissing(Tbl_true));
             imagesc(app.UIAxes6,A);
             cmap = winter(2);
             colormap(app.UIAxes7,cmap);
             app.UIAxes6.XTick = 1:length(varNames_true);
             app.UIAxes6.XTickLabel = varNames_true;
             app.UIAxes6.YTick = [1 size(Tbl_true,1)];
+            app.UIAxes6.YTickLabel = {string(size(Tbl_true,1)), '1'};
             app.UIAxes6.YDir = 'normal';
             % Displays the limits of two sliders
             app.DeleteRowsMinSlider.Limits = [1 size(Tbl_true,1)];
@@ -2364,7 +2301,7 @@ classdef DataCleaningTool < matlab.apps.AppBase
             app.UIAxes5.XTickLabel = varNames_true;
             app.UIAxes5.YLim = [0 100];
             
-            %%%%% 3 Numerical features tab %%%%%
+            % Numerical features tab
             % Descriptive statistics
             if app.NumberOfNumericalFeaturesEditField.Value ~= 0
                 a_numeric = zeros(1,size(Tbl_numeric,2));
@@ -2391,16 +2328,16 @@ classdef DataCleaningTool < matlab.apps.AppBase
                 app.UINumericTable.Data = {};
             end
             
-            %%%%% 4 Datetime features tab %%%%%
+            % Datetime features widget
             % Descriptive statistics
             if app.NumberOfDateTimeFeaturesEditField.Value ~= 0
-                a_datetime = {};
-                c_datetime = {};
+                a_datetime = cell([1 size(Tbl_datetime,2)]);
+                c_datetime = cell([1 size(Tbl_datetime,2)]);
                 DatesAndTimes = repmat({'Select'},size(Tbl_datetime,2),1);
                 l_datetime = repmat({'Select'},size(Tbl_datetime,2),1);
                 g_datetime = repmat({'Select'},size(Tbl_datetime,2),1);
-                e_datetime = {};
-                f_datetime = {};
+                e_datetime = cell([1 size(Tbl_datetime,2)]);
+                f_datetime = cell([1 size(Tbl_datetime,2)]);
                 for i = 1:size(Tbl_datetime,2)
                     a_datetime{i}=min(Tbl_datetime{:,i});
                     c_datetime{i}=max(Tbl_datetime{:,i});
@@ -2417,7 +2354,7 @@ classdef DataCleaningTool < matlab.apps.AppBase
                 app.UIDatetimeTable.Data = {};
             end
             
-            %%%%% 5 Text features tab %%%%%
+            % Text features tab
             % Descriptive statistics
             if app.NumberOfTextFeaturesEditField.Value ~= 0
                 a_text = {};
@@ -2433,32 +2370,23 @@ classdef DataCleaningTool < matlab.apps.AppBase
                 app.UITextTable.Data = {};
             end
             
-            %%%%% 6 Imputation tab %%%%%
+            % Imputation widget
             % Displays missing data percentage to be imputed
             app.PercentageofMissingDataEditField.Value = round((length(find(ismissing(Tbl_true)==1))/numel(Tbl_true))*100,2);
-            noofrows = app.NumberOfRowsEditField.Value;
-            noofcolumns = app.NumberOfColumnsEditField.Value;
-            noofnumericalfeatures = app.NumberOfNumericalFeaturesEditField.Value;
-            noofcategoricalfeatures = app.NumberOfTextFeaturesEditField.Value;
-            missingpercentagetobeimputed = app.PercentageofMissingDataEditField.Value;
-            [NRSME_pred,PEC_pred] = Interpolation(app,noofrows,noofcolumns,missingpercentagetobeimputed,noofnumericalfeatures,noofcategoricalfeatures);
-            % Displays expected error of imputation for numerical features
-            app.ExpectedErrorofImputationforNumericalFeaturesEditField.Value = NRSME_pred;
-            % Displays expected error of imputation for categorical features
-            app.ExpectedErrorofImputationforCategoricalFeaturesEditField.Value = PEC_pred;
             % Missing observations percentage table
             app.UIMissingObservationsTable_2.Data = t;
             % Missingness plot
-            A = ismissing(Tbl_true);
+            A = flip(ismissing(Tbl_true));
             imagesc(app.UIAxes8,A);
             cmap = winter(2);
             colormap(app.UIAxes9,cmap);
             app.UIAxes8.XTick = 1:length(varNames_true);
             app.UIAxes8.XTickLabel = varNames_true;
             app.UIAxes8.YTick = [1 size(Tbl_true,1)];
+            app.UIAxes8.YTickLabel = {string(size(Tbl_true,1)), '1'};
             app.UIAxes8.YDir = 'normal';
             
-            %%%%% 7 Data transformation tab %%%%%
+            % Data transformation widget
             app.SelectNumericalFeaturesListBox.Items = string(varNames_numeric);
             
             % Last modified time
@@ -2470,7 +2398,6 @@ classdef DataCleaningTool < matlab.apps.AppBase
 
         % Button pushed function: TransformButton
         function TransformButtonPushed(app, event)
-            %%%%%%%%%%%%%%%%%%%%
             % Changes background color to grey
             app.TransformButton.BackgroundColor = [0.65,0.65,0.65];
             pause(0.000001);
@@ -2495,21 +2422,19 @@ classdef DataCleaningTool < matlab.apps.AppBase
                 Y = X;
                 % Data standardization
                 if app.transformationEditField.Value == "mean 0 and standard deviation 1"
-                    %Number of observations
+                    % Number of observations
                     N=size(X(indices_nonnan),1);
-                    %Number of variables
-                    M=size(X(indices_nonnan),2);
-                    % output array of normalised values
-                    %Subtract mean of each column of data
+                    % Output array of normalised values
+                    % Subtract mean of each column of data
                     Y(indices_nonnan)=X(indices_nonnan)-repmat(mean(X(indices_nonnan)),N,1);
-                    %normalize each observation by the standard deviation of each column of data
+                    % Normalize each observation by the standard deviation of each column of data
                     Y(indices_nonnan)=Y(indices_nonnan)./repmat(std(X(indices_nonnan),0,1),N,1);
                     lengthofmissing = 0;
                 end
                 % Data normalization
                 if app.transformationEditField.Value == "between 0 and 1"
                     Y(indices_nonnan) = (X(indices_nonnan) - min(X(indices_nonnan))) / ( max(X(indices_nonnan)) - min(X(indices_nonnan)) );
-                    Y(find(Y(indices_nonnan)==Inf)) = NaN;
+                    Y(Y(indices_nonnan)==Inf) = NaN;
                     lengthofmissing = length(find(Y(indices_nonnan)==Inf));
                 end
                 % Natural Logarithmic transformation
@@ -2533,19 +2458,19 @@ classdef DataCleaningTool < matlab.apps.AppBase
                 % Exponential transformation
                 if app.transformationEditField.Value == "exp"
                     Y(indices_nonnan) = exp(X(indices_nonnan));
-                    Y(find(Y(indices_nonnan)==Inf)) = NaN;
+                    Y(Y(indices_nonnan)==Inf) = NaN;
                     lengthofmissing = length(find(Y(indices_nonnan)==Inf));
                 end
                 % Square root transformation
                 if app.transformationEditField.Value == "sqrt"
                     Y(indices_nonnan) = X(indices_nonnan).^(1/2);
-                    Y(find(X(indices_nonnan)<0)) = NaN;
+                    Y(X(indices_nonnan)<0) = NaN;
                     lengthofmissing = length(find(X(indices_nonnan)<0));
                 end
                 % Inverse transformation
                 if app.transformationEditField.Value == "reciprocal"
                     Y(indices_nonnan) = X(indices_nonnan).^(-1);
-                    Y(find(X(indices_nonnan)==0)) = NaN;
+                    Y(X(indices_nonnan)==0) = NaN;
                     lengthofmissing = length(find(X(indices_nonnan)==0));
                 end
             end
@@ -2565,7 +2490,7 @@ classdef DataCleaningTool < matlab.apps.AppBase
             app.DataTransformationDropDown.Value = 'Select';
             
             
-            %%%%% 1 Current data tab %%%%%
+            % Current data widget
             % Displays the original table with column names
             % Undo
             Tbl_true = app.UIMainTable.Data;
@@ -2581,7 +2506,6 @@ classdef DataCleaningTool < matlab.apps.AppBase
             app.UndoButton.BackgroundColor = [0.22 0.44 0.55];
             % Update
             Tbl = removevars(Tbl_true,app.IdListBox.Items);
-            varNames = Tbl.Properties.VariableNames;
             if l==0
                 fname1 = sprintf('saveddata/%s_updated.mat', app.EditField_7.Value);
             else
@@ -2611,7 +2535,7 @@ classdef DataCleaningTool < matlab.apps.AppBase
             varNames_text = Tbl_text.Properties.VariableNames;
             app.TextListBox.Items = string(varNames_text);
             
-            %%%%% 2 Data properties tab %%%%%
+            % Data properties widget
             writetable(Tbl_true,'filesize.csv')
             props = dir('filesize.csv');
             % Displays the file size in megabytes
@@ -2632,13 +2556,14 @@ classdef DataCleaningTool < matlab.apps.AppBase
             % Displays the number of duplicate columns
             app.NumberOfDuplicateColumnsEditField.Value = HasRepeatedColumns(app, Tbl_numeric);
             % Missingness plot
-            A = ismissing(Tbl_true);
+            A = flip(ismissing(Tbl_true));
             imagesc(app.UIAxes6,A);
             cmap = winter(2);
             colormap(app.UIAxes7,cmap);
             app.UIAxes6.XTick = 1:length(varNames_true);
             app.UIAxes6.XTickLabel = varNames_true;
             app.UIAxes6.YTick = [1 size(Tbl_true,1)];
+            app.UIAxes6.YTickLabel = {string(size(Tbl_true,1)), '1'};
             app.UIAxes6.YDir = 'normal';
             % Displays the limits of two sliders
             app.DeleteRowsMinSlider.Limits = [1 size(Tbl_true,1)];
@@ -2659,7 +2584,7 @@ classdef DataCleaningTool < matlab.apps.AppBase
             app.UIAxes5.XTickLabel = varNames_true;
             app.UIAxes5.YLim = [0 100];
             
-            %%%%% 3 Numerical features tab %%%%%
+            % Numerical features widget
             % Descriptive statistics
             if app.NumberOfNumericalFeaturesEditField.Value ~= 0
                 a_numeric = zeros(1,size(Tbl_numeric,2));
@@ -2686,16 +2611,16 @@ classdef DataCleaningTool < matlab.apps.AppBase
                 app.UINumericTable.Data = {};
             end
             
-            %%%%% 4 Datetime features tab %%%%%
+            % Datetime features widget
             % Descriptive statistics
             if app.NumberOfDateTimeFeaturesEditField.Value ~= 0
-                a_datetime = {};
-                c_datetime = {};
+                a_datetime = cell([1 size(Tbl_datetime,2)]);
+                c_datetime = cell([1 size(Tbl_datetime,2)]);
                 DatesAndTimes = repmat({'Select'},size(Tbl_datetime,2),1);
                 l_datetime = repmat({'Select'},size(Tbl_datetime,2),1);
                 g_datetime = repmat({'Select'},size(Tbl_datetime,2),1);
-                e_datetime = {};
-                f_datetime = {};
+                e_datetime = cell([1 size(Tbl_datetime,2)]);
+                f_datetime = cell([1 size(Tbl_datetime,2)]);
                 for i = 1:size(Tbl_datetime,2)
                     a_datetime{i}=min(Tbl_datetime{:,i});
                     c_datetime{i}=max(Tbl_datetime{:,i});
@@ -2712,7 +2637,7 @@ classdef DataCleaningTool < matlab.apps.AppBase
                 app.UIDatetimeTable.Data = {};
             end
             
-            %%%%% 5 Text features tab %%%%%
+            % Text features widget
             % Descriptive statistics
             if app.NumberOfTextFeaturesEditField.Value ~= 0
                 a_text = {};
@@ -2728,32 +2653,23 @@ classdef DataCleaningTool < matlab.apps.AppBase
                 app.UITextTable.Data = {};
             end
             
-            %%%%% 6 Imputation tab %%%%%
+            % Imputation widget
             % Displays missing data percentage to be imputed
             app.PercentageofMissingDataEditField.Value = round((length(find(ismissing(Tbl_true)==1))/numel(Tbl_true))*100,2);
-            noofrows = app.NumberOfRowsEditField.Value;
-            noofcolumns = app.NumberOfColumnsEditField.Value;
-            noofnumericalfeatures = app.NumberOfNumericalFeaturesEditField.Value;
-            noofcategoricalfeatures = app.NumberOfTextFeaturesEditField.Value;
-            missingpercentagetobeimputed = app.PercentageofMissingDataEditField.Value;
-            [NRSME_pred,PEC_pred] = Interpolation(app,noofrows,noofcolumns,missingpercentagetobeimputed,noofnumericalfeatures,noofcategoricalfeatures);
-            % Displays expected error of imputation for numerical features
-            app.ExpectedErrorofImputationforNumericalFeaturesEditField.Value = NRSME_pred;
-            % Displays expected error of imputation for categorical features
-            app.ExpectedErrorofImputationforCategoricalFeaturesEditField.Value = PEC_pred;
             % Missing observations percentage table
             app.UIMissingObservationsTable_2.Data = t;
             % Missingness plot
-            A = ismissing(Tbl_true);
+            A = flip(ismissing(Tbl_true));
             imagesc(app.UIAxes8,A);
             cmap = jet(2);
             colormap(app.UIAxes9,cmap);
             app.UIAxes8.XTick = 1:length(varNames_true);
             app.UIAxes8.XTickLabel = varNames_true;
             app.UIAxes8.YTick = [1 size(Tbl_true,1)];
+            app.UIAxes8.YTickLabel = {string(size(Tbl_true,1)), '1'};
             app.UIAxes8.YDir = 'normal';
             
-            %%%%% 7 Data transformation tab %%%%%
+            % Data transformation widget
             app.SelectNumericalFeaturesListBox.Items = string(varNames_numeric);
             
             % Last modified time
@@ -2765,12 +2681,11 @@ classdef DataCleaningTool < matlab.apps.AppBase
 
         % Button pushed function: GenerateReportButton
         function GenerateReportButtonPushed(app, event)
-            %%%%%%%%%%%%%%%%%%%%
             % Changes background color to grey
             app.GenerateReportButton.BackgroundColor = [0.65,0.65,0.65];
             pause(0.000001);
             
-            %%%%% Report %%%%%
+            % Report %
             makeDOMCompilable();
             import mlreportgen.dom.*
             import mlreportgen.report.*
@@ -2818,7 +2733,6 @@ classdef DataCleaningTool < matlab.apps.AppBase
                             opts = detectImportOptions(app.ImportDataEditField.Value,'NumHeaderLines',0);
                             format long
                             Tbl = readtable(app.ImportDataEditField.Value,opts);
-                            varNames = Tbl.Properties.VariableNames;
                             % Original data properties
                             % Extract numerical features
                             array_numeric = varfun(@isnumeric,Tbl,'output','uniform');
@@ -3283,7 +3197,6 @@ classdef DataCleaningTool < matlab.apps.AppBase
 
         % Value changed function: DropDown_2
         function DropDown_2ValueChanged(app, event)
-            %%%%%%%%%%%%%%%%%%%%
             value = app.DropDown_2.Value;
             
             app.caseEditField.Value = value;
@@ -3299,7 +3212,6 @@ classdef DataCleaningTool < matlab.apps.AppBase
 
         % Button pushed function: RemoveExtraSpaceButton
         function RemoveExtraSpaceButtonPushed(app, event)
-            %%%%%%%%%%%%%%%%%%%%
             % Changes background color to grey
             app.RemoveExtraSpaceButton.BackgroundColor = [0.65,0.65,0.65];
             pause(0.000001);
@@ -3324,13 +3236,12 @@ classdef DataCleaningTool < matlab.apps.AppBase
             app.DatetimeListBox.Value = {};
             app.TextListBox.Value = {};
             
-            %%%%% 1 Current data tab %%%%%
+            % Current data widget
             % Displays the original table with column names
             app.UIMainTable.Data = Tbl;
             app.UIMainTable.ColumnName = Tbl.Properties.VariableNames;
             % Undo
             Tbl_true = app.UIMainTable.Data;
-            varNames_true = Tbl_true.Properties.VariableNames;
             l = numel(app.ListBox0.Items);
             if l==0
                 fname0 = sprintf('saveddata/%s_undo.mat', app.EditField_7.Value);
@@ -3342,7 +3253,6 @@ classdef DataCleaningTool < matlab.apps.AppBase
             app.UndoButton.BackgroundColor = [0.22 0.44 0.55];
             % Update
             Tbl = removevars(Tbl_true,app.IdListBox.Items);
-            varNames = Tbl.Properties.VariableNames;
             if l==0
                 fname1 = sprintf('saveddata/%s_updated.mat', app.EditField_7.Value);
             else
@@ -3373,14 +3283,14 @@ classdef DataCleaningTool < matlab.apps.AppBase
             varNames_text = Tbl_text.Properties.VariableNames;
             app.TextListBox.Items = string(varNames_text);
             
-            %%%%% 2 Data properties tab %%%%%
+            % Data properties widget
             writetable(Tbl_true,'filesize.csv')
             props = dir('filesize.csv');
             % Displays the file size in megabytes
             app.FileSizeinMBEditField.Value = round(props.bytes/(1024^2),3);
             delete('filesize.csv');
             
-            %%%%% 3 Numerical features tab %%%%%
+            % Numerical features widget
             % Descriptive statistics
             if app.NumberOfNumericalFeaturesEditField.Value ~= 0
                 a_numeric = zeros(1,size(Tbl_numeric,2));
@@ -3407,16 +3317,16 @@ classdef DataCleaningTool < matlab.apps.AppBase
                 app.UINumericTable.Data = {};
             end
             
-            %%%%% 4 Datetime features tab %%%%%
+            % Datetime features widget
             % Descriptive statistics
             if app.NumberOfDateTimeFeaturesEditField.Value ~= 0
-                a_datetime = {};
-                c_datetime = {};
+                a_datetime = cell([1 size(Tbl_datetime,2)]);
+                c_datetime = cell([1 size(Tbl_datetime,2)]);
                 DatesAndTimes = repmat({'Select'},size(Tbl_datetime,2),1);
                 l_datetime = repmat({'Select'},size(Tbl_datetime,2),1);
                 g_datetime = repmat({'Select'},size(Tbl_datetime,2),1);
-                e_datetime = {};
-                f_datetime = {};
+                e_datetime = cell([1 size(Tbl_datetime,2)]);
+                f_datetime = cell([1 size(Tbl_datetime,2)]);
                 for i = 1:size(Tbl_datetime,2)
                     a_datetime{i}=min(Tbl_datetime{:,i});
                     c_datetime{i}=max(Tbl_datetime{:,i});
@@ -3431,7 +3341,7 @@ classdef DataCleaningTool < matlab.apps.AppBase
                 app.UIDatetimeTable.Data = t2;
             end
             
-            %%%%% 5 Text features tab %%%%%
+            % Text features widget
             % Descriptive statistics
             if app.NumberOfTextFeaturesEditField.Value ~= 0
                 a_text = {};
@@ -3454,7 +3364,6 @@ classdef DataCleaningTool < matlab.apps.AppBase
 
         % Value changed function: NumericalListBox
         function NumericalListBoxValueChanged(app, event)
-            %%%%%%%%%%%%%%%%%%%%
             value = app.NumericalListBox.Value;
             
             app.EditField.Value = value;
@@ -3470,7 +3379,6 @@ classdef DataCleaningTool < matlab.apps.AppBase
 
         % Value changed function: TextListBox
         function TextListBoxValueChanged(app, event)
-            %%%%%%%%%%%%%%%%%%%%
             value = app.TextListBox.Value;
             app.EditField.Value = value;
             app.EditField_2.Value = value;
@@ -3485,7 +3393,6 @@ classdef DataCleaningTool < matlab.apps.AppBase
 
         % Value changed function: DatetimeListBox
         function DatetimeListBoxValueChanged(app, event)
-            %%%%%%%%%%%%%%%%%%%%
             value = app.DatetimeListBox.Value;
             app.EditField.Value = value;
             app.EditField_2.Value = value;
@@ -3500,14 +3407,12 @@ classdef DataCleaningTool < matlab.apps.AppBase
 
         % Button pushed function: ChangeCaseButton
         function ChangeCaseButtonPushed(app, event)
-            %%%%%%%%%%%%%%%%%%%%
             % Changes background color to grey
             app.ChangeCaseButton.BackgroundColor = [0.65,0.65,0.65];
             pause(0.000001);
             
             % Present table
             Tbl = app.UIMainTable.Data;
-            varNames = Tbl.Properties.VariableNames;
             % Change case
             if isempty(app.caseEditField.Value) == false
                 if isempty(app.EditField.Value) == false
@@ -3528,13 +3433,12 @@ classdef DataCleaningTool < matlab.apps.AppBase
             app.DatetimeListBox.Value = {};
             app.TextListBox.Value = {};
             
-            %%%%% 1 Current data tab %%%%%
+            % Current data widget
             % Displays the original table with column names
             app.UIMainTable.Data = Tbl;
             app.UIMainTable.ColumnName = Tbl.Properties.VariableNames;
             % Undo
             Tbl_true = app.UIMainTable.Data;
-            varNames_true = Tbl_true.Properties.VariableNames;
             l = numel(app.ListBox0.Items);
             if l==0
                 fname0 = sprintf('saveddata/%s_undo.mat', app.EditField_7.Value);
@@ -3546,7 +3450,6 @@ classdef DataCleaningTool < matlab.apps.AppBase
             app.UndoButton.BackgroundColor = [0.22 0.44 0.55];
             % Update
             Tbl = removevars(Tbl_true,app.IdListBox.Items);
-            varNames = Tbl.Properties.VariableNames;
             if l==0
                 fname1 = sprintf('saveddata/%s_updated.mat', app.EditField_7.Value);
             else
@@ -3577,14 +3480,14 @@ classdef DataCleaningTool < matlab.apps.AppBase
             varNames_text = Tbl_text.Properties.VariableNames;
             app.TextListBox.Items = string(varNames_text);
             
-            %%%%% 2 Data properties tab %%%%%
+            % Data properties widget
             writetable(Tbl_true,'filesize.csv')
             props = dir('filesize.csv');
             % Displays the file size in megabytes
             app.FileSizeinMBEditField.Value = round(props.bytes/(1024^2),3);
             delete('filesize.csv');
             
-            %%%%% 3 Numerical features tab %%%%%
+            % Numerical features widget
             % Descriptive statistics
             if app.NumberOfNumericalFeaturesEditField.Value ~= 0
                 a_numeric = zeros(1,size(Tbl_numeric,2));
@@ -3611,16 +3514,16 @@ classdef DataCleaningTool < matlab.apps.AppBase
                 app.UINumericTable.Data = {};
             end
             
-            %%%%% 4 Datetime features tab %%%%%
+            % Datetime features widget
             % Descriptive statistics
             if app.NumberOfDateTimeFeaturesEditField.Value ~= 0
-                a_datetime = {};
-                c_datetime = {};
+                a_datetime = cell([1 size(Tbl_datetime,2)]);
+                c_datetime = cell([1 size(Tbl_datetime,2)]);
                 DatesAndTimes = repmat({'Select'},size(Tbl_datetime,2),1);
                 l_datetime = repmat({'Select'},size(Tbl_datetime,2),1);
                 g_datetime = repmat({'Select'},size(Tbl_datetime,2),1);
-                e_datetime = {};
-                f_datetime = {};
+                e_datetime = cell([1 size(Tbl_datetime,2)]);
+                f_datetime = cell([1 size(Tbl_datetime,2)]);
                 for i = 1:size(Tbl_datetime,2)
                     a_datetime{i}=min(Tbl_datetime{:,i});
                     c_datetime{i}=max(Tbl_datetime{:,i});
@@ -3635,7 +3538,7 @@ classdef DataCleaningTool < matlab.apps.AppBase
                 app.UIDatetimeTable.Data = t2;
             end
             
-            %%%%% 5 Text features tab %%%%%
+            % Text features widget
             % Descriptive statistics
             if app.NumberOfTextFeaturesEditField.Value ~= 0
                 a_text = {};
@@ -3658,7 +3561,6 @@ classdef DataCleaningTool < matlab.apps.AppBase
 
         % Value changed function: DropDown
         function DropDownValueChanged(app, event)
-            %%%%%%%%%%%%%%%%%%%%
             value = app.DropDown.Value;
             app.spaceEditField.Value = value;
             if strcmp(app.spaceEditField.Value, "Select") == 0
@@ -3667,14 +3569,12 @@ classdef DataCleaningTool < matlab.apps.AppBase
                 else
                     l = size(app.UITableSpace.Data(:,2),1);
                     app.UITableSpace.Data{l+1,2} = char(value);
-                    
                 end
             end
         end
 
         % Value changed function: SelectNumericalFeaturesListBox
         function SelectNumericalFeaturesListBoxValueChanged(app, event)
-            %%%%%%%%%%%%%%%%%%%%
             value = app.SelectNumericalFeaturesListBox.Value;
             
             l = numel(app.SelectedListBox.Items);
@@ -3683,14 +3583,12 @@ classdef DataCleaningTool < matlab.apps.AppBase
 
         % Value changed function: DropDown_4
         function DropDown_4ValueChanged(app, event)
-            %%%%%%%%%%%%%%%%%%%%
             value = app.DropDown_4.Value;
             app.categoryEditField.Value = value;
         end
 
         % Button pushed function: DeleteFeatureButton
         function DeleteFeatureButtonPushed2(app, event)
-            %%%%%%%%%%%%%%%%%%%%
             % Changes background color to grey
             app.DeleteFeatureButton.BackgroundColor = [0.65,0.65,0.65];
             pause(0.000001);
@@ -3711,7 +3609,7 @@ classdef DataCleaningTool < matlab.apps.AppBase
                 app.UIMainTable.ColumnName(index) = [];
             end
             
-            %%%%% 1 Current table %%%%%
+            % 1 Current table %
             % Displays the original table with column names
             % Undo
             Tbl_true = app.UIMainTable.Data;
@@ -3727,7 +3625,6 @@ classdef DataCleaningTool < matlab.apps.AppBase
             app.UndoButton.BackgroundColor = [0.22 0.44 0.55];
             % Update
             Tbl = removevars(Tbl_true,app.IdListBox.Items);
-            varNames = Tbl.Properties.VariableNames;
             if l==0
                 fname1 = sprintf('saveddata/%s_updated.mat', app.EditField_7.Value);
             else
@@ -3758,7 +3655,7 @@ classdef DataCleaningTool < matlab.apps.AppBase
             varNames_text = Tbl_text.Properties.VariableNames;
             app.TextListBox.Items = string(varNames_text);
             
-            %%%%% 2 Data properties %%%%%
+            % 2 Data properties %
             writetable(Tbl_true,'filesize.csv')
             props = dir('filesize.csv');
             % Displays the file size in megabytes
@@ -3787,13 +3684,14 @@ classdef DataCleaningTool < matlab.apps.AppBase
             % Displays the number of deleted columns
             app.NumberOfDeletedColumnsEditField.Value = app.ActualNoOfColumnsEditField.Value - size(Tbl_true,2);
             % Missingness plot
-            A = ismissing(Tbl_true);
+            A = flip(ismissing(Tbl_true));
             imagesc(app.UIAxes6,A);
             cmap = winter(2);
             colormap(app.UIAxes7,cmap);
             app.UIAxes6.XTick = 1:length(varNames_true);
             app.UIAxes6.XTickLabel = varNames_true;
             app.UIAxes6.YTick = [1 size(Tbl_true,1)];
+            app.UIAxes6.YTickLabel = {string(size(Tbl_true,1)), '1'};
             app.UIAxes6.YDir = 'normal';
             % Displays the limits of two sliders
             app.DeleteRowsMinSlider.Limits = [1 size(Tbl_true,1)];
@@ -3814,7 +3712,7 @@ classdef DataCleaningTool < matlab.apps.AppBase
             app.UIAxes5.XTickLabel = varNames_true;
             app.UIAxes5.YLim = [0 100];
             
-            %%%%% 3 Numerical features tab %%%%%
+            % Numerical features widget
             % Descriptive statistics
             if app.NumberOfNumericalFeaturesEditField.Value ~= 0
                 a_numeric = zeros(1,size(Tbl_numeric,2));
@@ -3841,16 +3739,16 @@ classdef DataCleaningTool < matlab.apps.AppBase
                 app.UINumericTable.Data = {};
             end
             
-            %%%%% 4 Datetime features tab %%%%%
+            % Datetime features widget
             % Descriptive statistics
             if app.NumberOfDateTimeFeaturesEditField.Value ~= 0
-                a_datetime = {};
-                c_datetime = {};
+                a_datetime = cell([1 size(Tbl_datetime,2)]);
+                c_datetime = cell([1 size(Tbl_datetime,2)]);
                 DatesAndTimes = repmat({'Select'},size(Tbl_datetime,2),1);
                 l_datetime = repmat({'Select'},size(Tbl_datetime,2),1);
                 g_datetime = repmat({'Select'},size(Tbl_datetime,2),1);
-                e_datetime = {};
-                f_datetime = {};
+                e_datetime = cell([1 size(Tbl_datetime,2)]);
+                f_datetime = cell([1 size(Tbl_datetime,2)]);
                 for i = 1:size(Tbl_datetime,2)
                     a_datetime{i}=min(Tbl_datetime{:,i});
                     c_datetime{i}=max(Tbl_datetime{:,i});
@@ -3867,7 +3765,7 @@ classdef DataCleaningTool < matlab.apps.AppBase
                 app.UIDatetimeTable.Data = {};
             end
             
-            %%%%% 5 Text features tab %%%%%
+            % Text features widget
             % Descriptive statistics
             if app.NumberOfTextFeaturesEditField.Value ~= 0
                 a_text = {};
@@ -3883,32 +3781,23 @@ classdef DataCleaningTool < matlab.apps.AppBase
                 app.UITextTable.Data = {};
             end
             
-            %%%%% 6 Imputation tab %%%%%
+            % Imputation widget
             % Displays missing data percentage to be imputed
             app.PercentageofMissingDataEditField.Value = round((length(find(ismissing(Tbl_true)==1))/numel(Tbl_true))*100,2);
-            noofrows = app.NumberOfRowsEditField.Value;
-            noofcolumns = app.NumberOfColumnsEditField.Value;
-            noofnumericalfeatures = app.NumberOfNumericalFeaturesEditField.Value;
-            noofcategoricalfeatures = app.NumberOfTextFeaturesEditField.Value;
-            missingpercentagetobeimputed = app.PercentageofMissingDataEditField.Value;
-            [NRSME_pred,PEC_pred] = Interpolation(app,noofrows,noofcolumns,missingpercentagetobeimputed,noofnumericalfeatures,noofcategoricalfeatures);
-            % Displays expected error of imputation for numerical features
-            app.ExpectedErrorofImputationforNumericalFeaturesEditField.Value = NRSME_pred;
-            % Displays expected error of imputation for categorical features
-            app.ExpectedErrorofImputationforCategoricalFeaturesEditField.Value = PEC_pred;
             % Missing observations percentage table
             app.UIMissingObservationsTable_2.Data = t;
             % Missingness plot
-            A = ismissing(Tbl_true);
+            A = flip(ismissing(Tbl_true));
             imagesc(app.UIAxes8,A);
             cmap = winter(2);
             colormap(app.UIAxes9,cmap);
             app.UIAxes8.XTick = 1:length(varNames_true);
             app.UIAxes8.XTickLabel = varNames_true;
             app.UIAxes8.YTick = [1 size(Tbl_true,1)];
+            app.UIAxes8.YTickLabel = {string(size(Tbl_true,1)), '1'};
             app.UIAxes8.YDir = 'normal';
             
-            %%%%% 7 Data transformation tab %%%%%
+            % Data transformation widget
             app.SelectNumericalFeaturesListBox.Items = string(varNames_numeric);
             
             % Last modified time
@@ -3920,7 +3809,6 @@ classdef DataCleaningTool < matlab.apps.AppBase
 
         % Button pushed function: DeleteRowsButton
         function DeleteRowsButtonPushed(app, event)
-            %%%%%%%%%%%%%%%%%%%%
             % Changes background color to grey
             app.DeleteRowsButton.BackgroundColor = [0.65,0.65,0.65];
             pause(0.000001);
@@ -3928,13 +3816,12 @@ classdef DataCleaningTool < matlab.apps.AppBase
             % Delete rows
             % Present table
             Tbl = app.UIMainTable.Data;
-            varNames = Tbl.Properties.VariableNames;
             indices = app.EditField_8.Value:app.EditField_9.Value;
             lengthOfIndices = length(indices);
             Tbl(indices, :) = [];
             app.UIMainTable.Data = Tbl;
             
-            %%%%% 1 Current data tab %%%%%
+            % Current data widget
             % Displays the original table with column names
             app.UIMainTable.Data = Tbl;
             app.UIMainTable.ColumnName = Tbl.Properties.VariableNames;
@@ -3952,7 +3839,6 @@ classdef DataCleaningTool < matlab.apps.AppBase
             app.UndoButton.BackgroundColor = [0.22 0.44 0.55];
             % Update
             Tbl = removevars(Tbl_true,app.IdListBox.Items);
-            varNames = Tbl.Properties.VariableNames;
             if l==0
                 fname1 = sprintf('saveddata/%s_updated.mat', app.EditField_7.Value);
             else
@@ -3983,7 +3869,7 @@ classdef DataCleaningTool < matlab.apps.AppBase
             varNames_text = Tbl_text.Properties.VariableNames;
             app.TextListBox.Items = string(varNames_text);
             
-            %%%%% 2 Data properties tab %%%%%
+            % Data properties widget
             writetable(Tbl_true,'filesize.csv')
             props = dir('filesize.csv');
             % Displays the file size in megabytes
@@ -4005,16 +3891,15 @@ classdef DataCleaningTool < matlab.apps.AppBase
             app.NumberOfDuplicateColumnsEditField.Value = HasRepeatedColumns(app, Tbl_numeric);
             % Displays the number of deleted rows
             app.NumberOfDeletedRowsEditField.Value = app.NumberOfDeletedRowsEditField.Value + lengthOfIndices;
-            % Displays the number of rows
-            %app.NumberOfRowsEditField.Value = size(Tbl_true,1);%app.ActualNoOfRowsEditField.Value - app.NumberOfDeletedRowsEditField.Value;
             % Missingness plot
-            A = ismissing(Tbl_true);
+            A = flip(ismissing(Tbl_true));
             imagesc(app.UIAxes6,A);
             cmap = winter(2);
             colormap(app.UIAxes7,cmap);
             app.UIAxes6.XTick = 1:length(varNames_true);
             app.UIAxes6.XTickLabel = varNames_true;
             app.UIAxes6.YTick = [1 size(Tbl_true,1)];
+            app.UIAxes6.YTickLabel = {string(size(Tbl_true,1)), '1'};
             app.UIAxes6.YDir = 'normal';
             % Displays the limits of two sliders
             app.DeleteRowsMinSlider.Limits = [1 size(Tbl_true,1)];
@@ -4035,7 +3920,7 @@ classdef DataCleaningTool < matlab.apps.AppBase
             app.UIAxes5.XTickLabel = varNames_true;
             app.UIAxes5.YLim = [0 100];
             
-            %%%%% 3 Numerical features tab %%%%%
+            % Numerical features widget
             % Descriptive statistics
             if app.NumberOfNumericalFeaturesEditField.Value ~= 0
                 a_numeric = zeros(1,size(Tbl_numeric,2));
@@ -4062,16 +3947,16 @@ classdef DataCleaningTool < matlab.apps.AppBase
                 app.UINumericTable.Data = {};
             end
             
-            %%%%% 4 Datetime features tab %%%%%
+            % Datetime features widget
             % Descriptive statistics
             if app.NumberOfDateTimeFeaturesEditField.Value ~= 0
-                a_datetime = {};
-                c_datetime = {};
+                a_datetime = cell([1 size(Tbl_datetime,2)]);
+                c_datetime = cell([1 size(Tbl_datetime,2)]);
                 DatesAndTimes = repmat({'Select'},size(Tbl_datetime,2),1);
                 l_datetime = repmat({'Select'},size(Tbl_datetime,2),1);
                 g_datetime = repmat({'Select'},size(Tbl_datetime,2),1);
-                e_datetime = {};
-                f_datetime = {};
+                e_datetime = cell([1 size(Tbl_datetime,2)]);
+                f_datetime = cell([1 size(Tbl_datetime,2)]);
                 for i = 1:size(Tbl_datetime,2)
                     a_datetime{i}=min(Tbl_datetime{:,i});
                     c_datetime{i}=max(Tbl_datetime{:,i});
@@ -4088,7 +3973,7 @@ classdef DataCleaningTool < matlab.apps.AppBase
                 app.UIDatetimeTable.Data = {};
             end
             
-            %%%%% 5 Text features tab %%%%%
+            % Text features widget
             % Descriptive statistics
             if app.NumberOfTextFeaturesEditField.Value ~= 0
                 a_text = {};
@@ -4104,32 +3989,23 @@ classdef DataCleaningTool < matlab.apps.AppBase
                 app.UITextTable.Data = {};
             end
             
-            %%%%% 6 Imputation tab %%%%%
+            % Imputation widget
             % Displays percentage of missing data to be imputed
             app.PercentageofMissingDataEditField.Value = round((length(find(ismissing(Tbl_true)==1))/numel(Tbl_true))*100,2);
-            noofrows = app.NumberOfRowsEditField.Value;
-            noofcolumns = app.NumberOfColumnsEditField.Value;
-            noofnumericalfeatures = app.NumberOfNumericalFeaturesEditField.Value;
-            noofcategoricalfeatures = app.NumberOfTextFeaturesEditField.Value;
-            missingpercentagetobeimputed = app.PercentageofMissingDataEditField.Value;
-            [NRSME_pred,PEC_pred] = Interpolation(app,noofrows,noofcolumns,missingpercentagetobeimputed,noofnumericalfeatures,noofcategoricalfeatures);
-            % Displays expected error of imputation for numerical features
-            app.ExpectedErrorofImputationforNumericalFeaturesEditField.Value = NRSME_pred;
-            % Displays expected error of imputation for categorical features
-            app.ExpectedErrorofImputationforCategoricalFeaturesEditField.Value = PEC_pred;
             % Missing obervations percentage table
             app.UIMissingObservationsTable_2.Data = t;
             % Missingness plot
-            A = ismissing(Tbl_true);
+            A = flip(ismissing(Tbl_true));
             imagesc(app.UIAxes8,A);
             cmap = winter(2);
             colormap(app.UIAxes9,cmap);
             app.UIAxes8.XTick = 1:length(varNames_true);
             app.UIAxes8.XTickLabel = varNames_true;
             app.UIAxes8.YTick = [1 size(Tbl_true,1)];
+            app.UIAxes8.YTickLabel = {string(size(Tbl_true,1)), '1'};
             app.UIAxes8.YDir = 'normal';
             
-            %%%%% 7 Data transformation tab %%%%%
+            % Data transformation widget
             app.SelectNumericalFeaturesListBox.Items = string(varNames_numeric);
             
             % Last modified time
@@ -4141,21 +4017,18 @@ classdef DataCleaningTool < matlab.apps.AppBase
 
         % Value changed function: DeleteRowsMinSlider
         function DeleteRowsMinSliderValueChanged(app, event)
-            %%%%%%%%%%%%%%%%%%%%
             value = app.DeleteRowsMinSlider.Value;
             app.EditField_8.Value = round(value);
         end
 
         % Value changed function: DeleteRowsMaxSlider
         function DeleteRowsMaxSliderValueChanged(app, event)
-            %%%%%%%%%%%%%%%%%%%%
             value = app.DeleteRowsMaxSlider.Value;
             app.EditField_9.Value = round(value);
         end
 
         % Button pushed function: SortFeaturesButton
         function SortFeaturesButtonPushed(app, event)
-            %%%%%%%%%%%%%%%%%%%%
             % Changes background color to grey
             app.SortFeaturesButton.BackgroundColor = [0.65,0.65,0.65];
             pause(0.000001);
@@ -4172,6 +4045,7 @@ classdef DataCleaningTool < matlab.apps.AppBase
                 t1 = sortrows(t,'m1');
                 app.UIMissingObservationsTable.Data = t1;
                 app.UIMissingObservationsTable_2.Data = t1;
+                A = zeros(size(Tbl,1), size(Tbl,2));
                 % Missingness plot
                 for i =1:size(t1,1)
                     A(:,i) = ismissing(Tbl.(string(app.UIMissingObservationsTable.Data{i,1})));
@@ -4200,7 +4074,7 @@ classdef DataCleaningTool < matlab.apps.AppBase
             end
             
             
-            %%%%% 1 Current data tab %%%%%
+            % Current data widget
             % Displays the original table with column names
             % Undo
             Tbl_true = app.UIMainTable.Data;
@@ -4216,7 +4090,6 @@ classdef DataCleaningTool < matlab.apps.AppBase
             app.UndoButton.BackgroundColor = [0.22 0.44 0.55];
             % Update
             Tbl = removevars(Tbl_true,app.IdListBox.Items);
-            varNames = Tbl.Properties.VariableNames;
             if l==0
                 fname1 = sprintf('saveddata/%s_updated.mat', app.EditField_7.Value);
             else
@@ -4247,14 +4120,14 @@ classdef DataCleaningTool < matlab.apps.AppBase
             varNames_text = Tbl_text.Properties.VariableNames;
             app.TextListBox.Items = string(varNames_text);
             
-            %%%%% 2 Data properties tab %%%%%
+            % Data properties widget
             writetable(Tbl_true,'filesize.csv')
             props = dir('filesize.csv');
             % Displays the file size in megabytes
             app.FileSizeinMBEditField.Value = round(props.bytes/(1024^2),3);
             delete('filesize.csv');
             
-            %%%%% 3 Numerical features tab %%%%%
+            % Numerical features widget
             % Descriptive statistics
             if app.NumberOfNumericalFeaturesEditField.Value ~= 0
                 a_numeric = zeros(1,size(Tbl_numeric,2));
@@ -4281,16 +4154,16 @@ classdef DataCleaningTool < matlab.apps.AppBase
                 app.UINumericTable.Data = {};
             end
             
-            %%%%% 4 Datetime features tab %%%%%
+            % Datetime features widget
             % Descriptive statistics
             if app.NumberOfDateTimeFeaturesEditField.Value ~= 0
-                a_datetime = {};
-                c_datetime = {};
+                a_datetime = cell([1 size(Tbl_datetime,2)]);
+                c_datetime = cell([1 size(Tbl_datetime,2)]);
                 DatesAndTimes = repmat({'Select'},size(Tbl_datetime,2),1);
                 l_datetime = repmat({'Select'},size(Tbl_datetime,2),1);
                 g_datetime = repmat({'Select'},size(Tbl_datetime,2),1);
-                e_datetime = {};
-                f_datetime = {};
+                e_datetime = cell([1 size(Tbl_datetime,2)]);
+                f_datetime = cell([1 size(Tbl_datetime,2)]);
                 for i = 1:size(Tbl_datetime,2)
                     a_datetime{i}=min(Tbl_datetime{:,i});
                     c_datetime{i}=max(Tbl_datetime{:,i});
@@ -4307,7 +4180,7 @@ classdef DataCleaningTool < matlab.apps.AppBase
                 app.UIDatetimeTable.Data = {};
             end
             
-            %%%%% 5 Text features tab %%%%%
+            % Text features widget
             % Descriptive statistics
             if app.NumberOfTextFeaturesEditField.Value ~= 0
                 a_text = {};
@@ -4324,16 +4197,17 @@ classdef DataCleaningTool < matlab.apps.AppBase
             end
             
             % Missingness plot
-            A = ismissing(Tbl_true);
+            A = flip(ismissing(Tbl_true));
             imagesc(app.UIAxes8,A);
             cmap = winter(2);
             colormap(app.UIAxes9,cmap);
             app.UIAxes8.XTick = 1:length(varNames_true);
             app.UIAxes8.XTickLabel = varNames_true;
             app.UIAxes8.YTick = [1 size(Tbl_true,1)];
+            app.UIAxes8.YTickLabel = {string(size(Tbl_true,1)), '1'};
             app.UIAxes8.YDir = 'normal';
             
-            %%%%% 6 Data transformation tab %%%%%
+            % Data transformation widget
             app.SelectNumericalFeaturesListBox.Items = string(varNames_numeric);
             
             % Last modified time
@@ -4345,46 +4219,46 @@ classdef DataCleaningTool < matlab.apps.AppBase
 
         % Value changed function: DataTransformationDropDown
         function DataTransformationDropDownValueChanged(app, event)
-            %%%%%%%%%%%%%%%%%%%%
             value = app.DataTransformationDropDown.Value;
             app.transformationEditField.Value = value;
         end
 
         % Value changed function: SelectedListBox
         function SelectedListBoxValueChanged(app, event)
-            %%%%%%%%%%%%%%%%%%%%
             value = app.SelectedListBox.Value;
             
-            %%Numerical Features
+            % Numerical Features
             Tbl = app.UIMainTable.Data;
             array_numeric = varfun(@isnumeric,Tbl,'output','uniform');
             index_notnumeric = find(array_numeric==0);
             Tbl_numeric = removevars(Tbl,index_notnumeric);
-            varNames_numeric = Tbl_numeric.Properties.VariableNames;
             
-            %%plot histogram for the selected feature
-            histogram(app.UIAxes_2,Tbl_numeric.(string(value)))
+            % Plot histogram for the selected feature
+            nbins = app.NumberofBinsEditField_2.Value;
+            if nbins == 0
+                histogram(app.UIAxes_2,Tbl_numeric.(string(value)))
+            else
+                histogram(app.UIAxes_2,Tbl_numeric.(string(value)),nbins)
+            end
             app.UIAxes_2.XLabel.Interpreter = 'latex';
             app.UIAxes_2.XLabel.String = string(value);
         end
 
         % Cell selection callback: UIMissingObservationsTable
         function UIMissingObservationsTableCellSelection2(app, event)
-            %%%%%%%%%%%%%%%%%%%%
             indices = event.Indices;
             app.EditFieldWhatsLeft1.Value = indices(1);
         end
 
         % Button pushed function: ImputeButton
         function ImputeButtonPushed(app, event)
-            %%%%%%%%%%%%%%%%%%%%
             % Changes background color to grey
             app.ImputeButton.BackgroundColor = [0.65,0.65,0.65];
             pause(0.000001);
             
             app.EditField2.Value = 1;
             app.UIAxes8.Visible = 'on';
-            % Tbl an nÃ—p table
+            % Tbl an n×p table
             Tbl = app.UIMainTable.Data;
             varNames = Tbl.Properties.VariableNames;
             
@@ -4401,24 +4275,15 @@ classdef DataCleaningTool < matlab.apps.AppBase
                 app.ImputationErrorEditField.Value = sprintf('Message. Datetime imputation is not possible.');
                 % Displays missing data percentage imputed
                 app.PercentageofMissingDataImputedEditField.Value = round((length(find(ismissing(X)==1))/numel(Tbl))*100,2);
-                noofrows = app.NumberOfRowsEditField.Value;
-                noofcolumns = app.NumberOfColumnsEditField.Value;
-                noofnumericalfeatures = app.NumberOfNumericalFeaturesEditField.Value;
-                noofcategoricalfeatures = app.NumberOfTextFeaturesEditField.Value;
-                missingpercentagetobeimputed = app.PercentageofMissingDataEditField.Value;
-                [NRSME_pred,PEC_pred] = Interpolation(app,noofrows,noofcolumns,missingpercentagetobeimputed,noofnumericalfeatures,noofcategoricalfeatures);
-                % Displays expected error of imputation for numerical features
-                app.ExpectedErrorofImputationforNumericalFeaturesEditField_2.Value = NRSME_pred;
-                % Displays expected error of imputation for categorical features
-                app.ExpectedErrorofImputationforCategoricalFeaturesEditField_2.Value = PEC_pred;
                 % Imputation plot
-                A = ismissing(X);
+                A = flip(ismissing(X));
                 imagesc(app.UIAxes8,A);
                 cmap = jet(2);
                 colormap(app.UIAxes8,cmap);
                 app.UIAxes8.XTick = 1:length(varNames_X);
                 app.UIAxes8.XTickLabel = varNames_X;
                 app.UIAxes8.YTick = [1 size(X,1)];
+                app.UIAxes8.YTickLabel = {string(size(X,1)), '1'};
                 app.UIAxes8.YDir = 'normal';
                 colormap(app.UIAxes9,cmap);
                 cb = colorbar(app.UIAxes9,'south','FontSize',8,'Limits',[0 1]);
@@ -4428,18 +4293,15 @@ classdef DataCleaningTool < matlab.apps.AppBase
             else
                 % Displays missing data percentage imputed
                 app.PercentageofMissingDataImputedEditField.Value = app.PercentageofMissingDataEditField.Value;
-                % Displays expected error of imputation for numerical features
-                app.ExpectedErrorofImputationforNumericalFeaturesEditField_2.Value = app.ExpectedErrorofImputationforNumericalFeaturesEditField.Value;
-                % Displays expected error of imputation for categorical features
-                app.ExpectedErrorofImputationforCategoricalFeaturesEditField_2.Value = app.ExpectedErrorofImputationforCategoricalFeaturesEditField.Value;
                 % Imputation plot
-                A = ismissing(Tbl);
+                A = flip(ismissing(Tbl));
                 imagesc(app.UIAxes8,A);
                 cmap = jet(2);
                 colormap(app.UIAxes8,cmap);
                 app.UIAxes8.XTick = 1:length(varNames);
                 app.UIAxes8.XTickLabel = varNames;
                 app.UIAxes8.YTick = [1 size(Tbl,1)];
+                app.UIAxes8.YTickLabel = {string(size(Tbl,1)), '1'};
                 app.UIAxes8.YDir = 'normal';
                 colormap(app.UIAxes9,cmap);
                 cb = colorbar(app.UIAxes9,'south','FontSize',8,'Limits',[0 1]);%,'Ticks',[0 1],'TickLabels',{'Observed','Missing'});
@@ -4447,8 +4309,6 @@ classdef DataCleaningTool < matlab.apps.AppBase
                 cb.TickLabels = {'Observed','Imputed'};
                 set(cb,'position',[0.45 0.4 .09 .3])
             end
-            
-            
             
             % Extract numerical features
             array_numeric = varfun(@isnumeric,X,'output','uniform');
@@ -4504,13 +4364,11 @@ classdef DataCleaningTool < matlab.apps.AppBase
                         x_obs = X_old(indexObserved{s},:);
                         x_obs(:,s) = [];
                         
-                        y_misold = X_old(indexMissing{s},s);
-                        
                         x_mis = X_old(indexMissing{s},:);
                         x_mis(:,s) = [];
                         
                         % Fit a random forest: y_obs(s)~x_obs(s)
-                        NumTrees = 10;
+                        NumTrees = app.NumberofTreesEditField.Value;
                         if any(varNames_numeric == string(X_old.Properties.VariableNames{s})) == 1
                             Mdl = TreeBagger(NumTrees,x_obs,y_obs,'Method','regression');
                         else
@@ -4528,7 +4386,7 @@ classdef DataCleaningTool < matlab.apps.AppBase
                         X_old = X_newimp;
                     end
                 end
-                % update gamma
+                % Update gamma
                 Delta_N = sum(sum((X_newimp{:,index_numeric} - X_oldimp{:,index_numeric}).^2))/sum(sum((X_newimp{:,index_numeric}).^2));
                 
                 I = 0;
@@ -4555,10 +4413,10 @@ classdef DataCleaningTool < matlab.apps.AppBase
                 % Iteration increases by 1
                 iteration = iteration + 1;
             end
-            % return the imputed matrix Ximp
+            % Return the imputed matrix Ximp
             X_imputed = X_oldimp;
             varNames_imputed = X_imputed.Properties.VariableNames;
-            %%%%% 1 Current data tab %%%%%
+            % Current data widget
             % Displays the original table with column names
             for i = 1:length(varNames_imputed)
                 Tbl.(string(varNames_imputed(i))) = X_imputed{:,i};
@@ -4580,7 +4438,6 @@ classdef DataCleaningTool < matlab.apps.AppBase
             app.UndoButton.BackgroundColor = [0.22 0.44 0.55];
             % Update
             Tbl = removevars(Tbl_true,app.IdListBox.Items);
-            varNames = Tbl.Properties.VariableNames;
             if l==0
                 fname1 = sprintf('saveddata/%s_updated.mat', app.EditField_7.Value);
             else
@@ -4610,7 +4467,7 @@ classdef DataCleaningTool < matlab.apps.AppBase
             varNames_text = Tbl_text.Properties.VariableNames;
             app.TextListBox.Items = string(varNames_text);
             
-            %%%%% 2 Data properties tab %%%%%
+            % Data properties widget
             writetable(Tbl_true,'filesize.csv')
             props = dir('filesize.csv');
             % Displays the file size in megabytes
@@ -4635,13 +4492,14 @@ classdef DataCleaningTool < matlab.apps.AppBase
             % Displays the number of deleted columns
             app.NumberOfDeletedColumnsEditField.Value = app.ActualNoOfColumnsEditField.Value - app.NumberOfColumnsEditField.Value;
             % Missingness plot
-            A = ismissing(Tbl_true);
+            A = flip(ismissing(Tbl_true));
             imagesc(app.UIAxes6,A);
             cmap = winter(2);
             colormap(app.UIAxes7,cmap);
             app.UIAxes6.XTick = 1:length(varNames_true);
             app.UIAxes6.XTickLabel = varNames_true;
             app.UIAxes6.YTick = [1 size(Tbl_true,1)];
+            app.UIAxes6.YTickLabel = {string(size(Tbl_true,1)), '1'};
             app.UIAxes6.YDir = 'normal';
             % Displays the limits of two sliders
             app.DeleteRowsMinSlider.Limits = [1 size(Tbl_true,1)];
@@ -4662,7 +4520,7 @@ classdef DataCleaningTool < matlab.apps.AppBase
             app.UIAxes5.XTickLabel = varNames_true;
             app.UIAxes5.YLim = [0 100];
             
-            %%%%% 3 Numerical features tab %%%%%
+            % Numerical features widget
             % Descriptive statistics
             if app.NumberOfNumericalFeaturesEditField.Value ~= 0
                 a_numeric = zeros(1,size(Tbl_numeric,2));
@@ -4689,16 +4547,16 @@ classdef DataCleaningTool < matlab.apps.AppBase
                 app.UINumericTable.Data = {};
             end
             
-            %%%%% 4 Datetime features tab %%%%%
+            % Datetime features widget
             % Descriptive statistics
             if app.NumberOfDateTimeFeaturesEditField.Value ~= 0
-                a_datetime = {};
-                c_datetime = {};
+                a_datetime = cell([1 size(Tbl_datetime,2)]);
+                c_datetime = cell([1 size(Tbl_datetime,2)]);
                 DatesAndTimes = repmat({'Select'},size(Tbl_datetime,2),1);
                 l_datetime = repmat({'Select'},size(Tbl_datetime,2),1);
                 g_datetime = repmat({'Select'},size(Tbl_datetime,2),1);
-                e_datetime = {};
-                f_datetime = {};
+                e_datetime = cell([1 size(Tbl_datetime,2)]);
+                f_datetime = cell([1 size(Tbl_datetime,2)]);
                 for i = 1:size(Tbl_datetime,2)
                     a_datetime{i}=min(Tbl_datetime{:,i});
                     c_datetime{i}=max(Tbl_datetime{:,i});
@@ -4715,7 +4573,7 @@ classdef DataCleaningTool < matlab.apps.AppBase
                 app.UIDatetimeTable.Data = {};
             end
             
-            %%%%% 5 Text features tab %%%%%
+            % Text features widget
             % Descriptive statistics
             if app.NumberOfTextFeaturesEditField.Value ~= 0
                 a_text = {};
@@ -4731,24 +4589,14 @@ classdef DataCleaningTool < matlab.apps.AppBase
                 app.UITextTable.Data = {};
             end
             
-            %%%%% 6 Imputation tab %%%%%
+            % Imputation widget
             % Displays missing data percentage to be imputed
             app.PercentageofMissingDataEditField.Value = round((length(find(ismissing(Tbl_true)==1))/numel(Tbl_true))*100,2);
-            noofrows = app.NumberOfRowsEditField.Value;
-            noofcolumns = app.NumberOfColumnsEditField.Value;
-            noofnumericalfeatures = app.NumberOfNumericalFeaturesEditField.Value;
-            noofcategoricalfeatures = app.NumberOfTextFeaturesEditField.Value;
-            missingpercentagetobeimputed = app.PercentageofMissingDataEditField.Value;
-            [NRSME_pred,PEC_pred] = Interpolation(app,noofrows,noofcolumns,missingpercentagetobeimputed,noofnumericalfeatures,noofcategoricalfeatures);
-            % Displays expected error of imputation for numerical features
-            app.ExpectedErrorofImputationforNumericalFeaturesEditField.Value = NRSME_pred;
-            % Displays expected error of imputation for categorical features
-            app.ExpectedErrorofImputationforCategoricalFeaturesEditField.Value = PEC_pred;
             % Missing observations percentage table
             app.UIMissingObservationsTable_2.Data = t;
             
             
-            %%%%% 7 Data transformation tab %%%%%
+            % Data transformation widget
             app.SelectNumericalFeaturesListBox.Items = string(varNames_numeric);
             
             % Last modified time
@@ -4760,13 +4608,11 @@ classdef DataCleaningTool < matlab.apps.AppBase
 
         % Value changed function: IdListBox
         function IdListBoxValueChanged(app, event)
-             %%%%%%%%%%%%%%%%%%%%
              value = app.IdListBox.Value;
         end
 
         % Button pushed function: IdButton
         function IdButtonPushed(app, event)
-            %%%%%%%%%%%%%%%%%%%%
             % Changes background color to grey
             app.IdButton.BackgroundColor = [0.65,0.65,0.65];
             pause(0.000001);
@@ -4793,11 +4639,10 @@ classdef DataCleaningTool < matlab.apps.AppBase
             app.UIDatetimeTable.Data = {};
             app.UITextTable.Data = {};
             
-            %%%%% 1 Current data tab %%%%%
+            % Current data widget
             % Displays the original table with column names
             % Undo
             Tbl_true = app.UIMainTable.Data;
-            varNames_true = Tbl_true.Properties.VariableNames;
             l = numel(app.ListBox0.Items);
             if l==0
                 fname0 = sprintf('saveddata/%s_undo.mat', app.EditField_7.Value);
@@ -4809,7 +4654,6 @@ classdef DataCleaningTool < matlab.apps.AppBase
             app.UndoButton.BackgroundColor = [0.22 0.44 0.55];
             % Update
             Tbl = removevars(Tbl_true,app.IdListBox.Items);
-            varNames = Tbl.Properties.VariableNames;
             if l==0
                 fname1 = sprintf('saveddata/%s_updated.mat', app.EditField_7.Value);
             else
@@ -4839,7 +4683,7 @@ classdef DataCleaningTool < matlab.apps.AppBase
             varNames_text = Tbl_text.Properties.VariableNames;
             app.TextListBox.Items = string(varNames_text);
             
-            %%%%% 2 Data properties tab %%%%%
+            % Data properties widget
             % Displays the number of id features
             app.NumberOfIdFeaturesEditField.Value = numel(app.IdListBox.Items);
             % Displays the number of numerical features
@@ -4849,7 +4693,7 @@ classdef DataCleaningTool < matlab.apps.AppBase
             % Displays the number of text features
             app.NumberOfTextFeaturesEditField.Value = size(Tbl_text,2);
             
-            %%%%% 3 Numerical features tab %%%%%
+            % Numerical features widget
             % Descriptive statistics
             if app.NumberOfNumericalFeaturesEditField.Value ~= 0
                 a_numeric = zeros(1,size(Tbl_numeric,2));
@@ -4876,16 +4720,16 @@ classdef DataCleaningTool < matlab.apps.AppBase
                 app.UINumericTable.Data = {};
             end
             
-            %%%%% 4 Datetime features tab %%%%%
+            % Datetime features widget
             % Descriptive statistics
             if app.NumberOfDateTimeFeaturesEditField.Value ~= 0
-                a_datetime = {};
-                c_datetime = {};
+                a_datetime = cell([1 size(Tbl_datetime,2)]);
+                c_datetime = cell([1 size(Tbl_datetime,2)]);
                 DatesAndTimes = repmat({'Select'},size(Tbl_datetime,2),1);
                 l_datetime = repmat({'Select'},size(Tbl_datetime,2),1);
                 g_datetime = repmat({'Select'},size(Tbl_datetime,2),1);
-                e_datetime = {};
-                f_datetime = {};
+                e_datetime = cell([1 size(Tbl_datetime,2)]);
+                f_datetime = cell([1 size(Tbl_datetime,2)]);
                 for i = 1:size(Tbl_datetime,2)
                     a_datetime{i}=min(Tbl_datetime{:,i});
                     c_datetime{i}=max(Tbl_datetime{:,i});
@@ -4902,7 +4746,7 @@ classdef DataCleaningTool < matlab.apps.AppBase
                 app.UIDatetimeTable.Data = {};
             end
             
-            %%%%% 5 Text features tab %%%%%
+            % Text features widget
             % Descriptive statistics
             if app.NumberOfTextFeaturesEditField.Value ~= 0
                 a_text = {};
@@ -4918,7 +4762,7 @@ classdef DataCleaningTool < matlab.apps.AppBase
                 app.UITextTable.Data = {};
             end
             
-            %%%%% 7 Data transformation tab %%%%%
+            % Data transformation widget
             app.SelectNumericalFeaturesListBox.Items = string(varNames_numeric);
             
             % Last modified time
@@ -4930,7 +4774,6 @@ classdef DataCleaningTool < matlab.apps.AppBase
 
         % Button pushed function: UndoButton
         function UndoButtonPushed(app, event)
-            %%%%%%%%%%%%%%%%%%%%
             % Changes background color to grey
             app.UndoButton.BackgroundColor = [0.65,0.65,0.65];
             pause(0.000001);
@@ -4948,7 +4791,7 @@ classdef DataCleaningTool < matlab.apps.AppBase
                 load(fname1);
                 varNames = Tbl.Properties.VariableNames;
                 
-                %%%%% 1 Current data tab %%%%%
+                % Current data widget
                 % Displays the original table with column names
                 app.UIMainTable.Data = Tbl_true;
                 app.UIMainTable.ColumnName = varNames_true;
@@ -4957,13 +4800,10 @@ classdef DataCleaningTool < matlab.apps.AppBase
                     app.IdListBox.Items = {};
                 else
                     % Find the intersection
-                    varNames_true;
-                    varNames;
-                    [C,ia,ib] = intersect(varNames_true,varNames);
+                    [~,ia,~] = intersect(varNames_true,varNames);
                     % Remove from A the intersection of A and B
                     AminusB = varNames_true;
                     AminusB(ia) = [];
-                    AminusB;
                     app.IdListBox.Items = AminusB;
                 end
                 % Extract numerical features
@@ -4988,7 +4828,7 @@ classdef DataCleaningTool < matlab.apps.AppBase
                 varNames_text = Tbl_text.Properties.VariableNames;
                 app.TextListBox.Items = string(varNames_text);
                 
-                %%%%% 2 Data properties tab %%%%%
+                % Data properties widget
                 writetable(Tbl_true,'filesize.csv')
                 props = dir('filesize.csv');
                 % Displays the file size in megabytes
@@ -5023,13 +4863,14 @@ classdef DataCleaningTool < matlab.apps.AppBase
                     app.NumberOfDeletedColumnsEditField.Value = app.ActualNoOfColumnsEditField.Value - size(Tbl_true,2);
                 end
                 % Missingness plot
-                A = ismissing(Tbl_true);
+                A = flip(ismissing(Tbl_true));
                 imagesc(app.UIAxes6,A);
                 cmap = winter(2);
                 colormap(app.UIAxes7,cmap);
                 app.UIAxes6.XTick = 1:length(varNames_true);
                 app.UIAxes6.XTickLabel = varNames_true;
                 app.UIAxes6.YTick = [1,size(Tbl_true,1)];
+                app.UIAxes6.YTickLabel = {string(size(Tbl_true,1)), '1'};
                 app.UIAxes6.YDir = 'normal';
                 colormap(app.UIAxes7,cmap);
                 cb = colorbar(app.UIAxes7,'south','FontSize',8,'Limits',[0 1],'Ticks',[0 1],'TickLabels',{'Observed','Missing'});
@@ -5053,7 +4894,7 @@ classdef DataCleaningTool < matlab.apps.AppBase
                 app.UIAxes5.XTickLabel = varNames_true;
                 app.UIAxes5.YLim = [0 100];
                 
-                %%%%% 3 Numerical features tab %%%%%
+                % Numerical features tab
                 % Descriptive statistics
                 if app.NumberOfNumericalFeaturesEditField.Value ~= 0
                     a_numeric = zeros(1,size(Tbl_numeric,2));
@@ -5078,16 +4919,16 @@ classdef DataCleaningTool < matlab.apps.AppBase
                     app.UINumericTable.Data = t1;
                 end
                 
-                %%%%% 4 Datetime features tab %%%%%
+                % Datetime features tab
                 % Descriptive statistics
                 if app.NumberOfDateTimeFeaturesEditField.Value ~= 0
-                    a_datetime = {};
-                    c_datetime = {};
+                    a_datetime = cell([1 size(Tbl_datetime,2)]);
+                    c_datetime = cell([1 size(Tbl_datetime,2)]);
                     DatesAndTimes = repmat({'Select'},size(Tbl_datetime,2),1);
                     l_datetime = repmat({'Select'},size(Tbl_datetime,2),1);
                     g_datetime = repmat({'Select'},size(Tbl_datetime,2),1);
-                    e_datetime = {};
-                    f_datetime = {};
+                    e_datetime = cell([1 size(Tbl_datetime,2)]);
+                    f_datetime = cell([1 size(Tbl_datetime,2)]);
                     for i = 1:size(Tbl_datetime,2)
                         a_datetime{i}=min(Tbl_datetime{:,i});
                         c_datetime{i}=max(Tbl_datetime{:,i});
@@ -5102,7 +4943,7 @@ classdef DataCleaningTool < matlab.apps.AppBase
                     app.UIDatetimeTable.Data = t2;
                 end
                 
-                %%%%% 5 Text features tab %%%%%
+                % Text features widget
                 % Descriptive statistics
                 if app.NumberOfTextFeaturesEditField.Value ~= 0
                     a_text = {};
@@ -5116,47 +4957,30 @@ classdef DataCleaningTool < matlab.apps.AppBase
                     app.UITextTable.Data = t3;
                 end
                 
-                %%%%% 6 Imputation tab %%%%%
+                % Imputation tab
                 % Displays missing data percentage to be imputed
                 app.PercentageofMissingDataEditField.Value = round((length(find(ismissing(Tbl_true)==1))/numel(Tbl_true))*100,2);
-                noofrows = app.NumberOfRowsEditField.Value;
-                noofcolumns = app.NumberOfColumnsEditField.Value;
-                noofnumericalfeatures = app.NumberOfNumericalFeaturesEditField.Value;
-                noofcategoricalfeatures = app.NumberOfTextFeaturesEditField.Value;
-                missingpercentagetobeimputed = app.PercentageofMissingDataEditField.Value;
-                [NRSME_pred,PEC_pred] = Interpolation(app,noofrows,noofcolumns,missingpercentagetobeimputed,noofnumericalfeatures,noofcategoricalfeatures);
-                % Displays expected error of imputation for numerical features
-                app.ExpectedErrorofImputationforNumericalFeaturesEditField.Value = NRSME_pred;
-                % Displays expected error of imputation for categorical features
-                app.ExpectedErrorofImputationforCategoricalFeaturesEditField.Value = PEC_pred;
                 % Missing observations percentage table
                 app.UIMissingObservationsTable_2.Data = t;
                 % Missingness plot
-                A = ismissing(Tbl_true);
+                A = flip(ismissing(Tbl_true));
                 imagesc(app.UIAxes8,A);
                 cmap = jet(2);
                 colormap(app.UIAxes9,cmap);
                 app.UIAxes8.XTick = 1:length(varNames_true);
                 app.UIAxes8.XTickLabel = varNames_true;
                 app.UIAxes8.YTick = [1,size(Tbl_true,1)];
+                app.UIAxes8.YTickLabel = {string(size(Tbl_true,1)), '1'};
                 app.UIAxes8.YDir = 'normal';
                 if app.EditField2.Value == 1
                     % Displays missing data percentage imputed
                     app.PercentageofMissingDataImputedEditField.Value = app.PercentageofMissingDataEditField.Value;
-                    % Displays expected error of imputation for numerical features
-                    app.ExpectedErrorofImputationforNumericalFeaturesEditField_2.Value = app.ExpectedErrorofImputationforNumericalFeaturesEditField.Value;
-                    % Displays expected error of imputation for categorical features
-                    app.ExpectedErrorofImputationforCategoricalFeaturesEditField_2.Value = app.ExpectedErrorofImputationforCategoricalFeaturesEditField.Value;
                 else
                     % Displays missing data percentage imputed
                     app.PercentageofMissingDataImputedEditField.Value = 0;
-                    % Displays expected error of imputation for numerical features
-                    app.ExpectedErrorofImputationforNumericalFeaturesEditField_2.Value = 0;
-                    % Displays expected error of imputation for categorical features
-                    app.ExpectedErrorofImputationforCategoricalFeaturesEditField_2.Value = 0;
                 end
                 
-                %%%%% 7 Data transformation tab %%%%%
+                % Data transformation tab
                 app.SelectNumericalFeaturesListBox.Items = string(varNames_numeric);
                 app.SelectedListBox.Value = {};
                 app.DataTransformationErrorEditField.Value = '';
@@ -5167,11 +4991,11 @@ classdef DataCleaningTool < matlab.apps.AppBase
             elseif l-app.EditField0.Value == 0
                 app.ImportDataEditField.Value = '';
                 
-                %%%%% 1 Current Data %%%%%
+                % Current Data 
                 app.UIMainTable.Data = {};
                 app.UIMainTable.ColumnName = {};
                 
-                %%%%% 2 Data properties tab %%%%%
+                % Data properties widget
                 app.ActualNoOfRowsEditField.Value = 0;
                 app.ActualNoOfColumnsEditField.Value = 0;
                 app.IdListBox.Items = {''};
@@ -5219,18 +5043,20 @@ classdef DataCleaningTool < matlab.apps.AppBase
                 app.UIAxes5.cla;
                 app.UIAxes5.XTick = {};
                 
-                %%%%% 3 Numerical features tab %%%%%
+                % Numerical features widget
                 % Descriptive statistics
                 app.UINumericTable.Data = {};
                 app.UIAxes.cla;
                 app.UIAxes.XLabel.String = '';
+                % Displays the number of bins
+                app.NumberofBinsEditField.Value = 0;
                 % Displays the limits of two sliders
                 app.MinEditSliderNumeric.Limits = [0 100];
                 app.MaxEditSliderNumeric.Limits = [0 100];
                 app.MinEditSliderNumeric.Value = 0;
                 app.MaxEditSliderNumeric.Value = 100;
                 
-                %%%%% 4 Datetime features tab %%%%%
+                % Datetime features widget
                 % Descriptive statistics
                 app.UIDatetimeTable.Data = {};
                 app.UIAxes4_3.cla;
@@ -5241,7 +5067,7 @@ classdef DataCleaningTool < matlab.apps.AppBase
                 app.MinEditSliderDatetime.Value = 0;
                 app.MaxEditSliderDatetime.Value = 100;
                 
-                %%%%% 5 Text features tab %%%%%
+                % Text features widget
                 % Descriptive statistics
                 app.UITextTable.Data = {};
                 app.UICategoryTextTable.Data = {};
@@ -5257,32 +5083,28 @@ classdef DataCleaningTool < matlab.apps.AppBase
                 app.UITableTextColumnIndices.Data = {};
                 
                 
-                %%%%% 7 Imputation tab %%%%%
+                % Imputation widget
                 app.PercentageofMissingDataEditField.Value = 0;
-                % Displays expected error of imputation for numerical features
-                app.ExpectedErrorofImputationforNumericalFeaturesEditField.Value = 0;
-                % Displays expected error of imputation for categorical features
-                app.ExpectedErrorofImputationforCategoricalFeaturesEditField.Value = 0;
                 % Missing observations percentage table
                 app.UIMissingObservationsTable_2.Data = {};
                 % Displays missing data percentage imputed
                 app.PercentageofMissingDataImputedEditField.Value = 0;
-                % Displays expected error of imputation for numerical features
-                app.ExpectedErrorofImputationforNumericalFeaturesEditField_2.Value = 0;
-                % Displays expected error of imputation for categorical features
-                app.ExpectedErrorofImputationforCategoricalFeaturesEditField_2.Value = 0;
+                % Displays the number of trees
+                app.NumberofTreesEditField.Value = 10;
                 % Displays imputation plot
                 app.UIAxes8.cla;
                 app.UIAxes8.XTick = {};
                 app.ImputationErrorEditField.Value = '';
                 app.ImputationErrorEditField.Visible = 'off';
                 
-                %%%%% 6 Data transformation tab %%%%%
+                % Data transformation widget
                 app.SelectNumericalFeaturesListBox.Items = {''};
                 app.SelectedListBox.Items = {''};
                 app.UIAxes_2.cla;
                 app.DataTransformationErrorEditField.Value = '';
                 app.DataTransformationErrorEditField.Visible = 'off';
+                % Displays the number of bins
+                app.NumberofBinsEditField_2.Value = 0;
                 
                 app.ListBox.Items = {''};
                 
@@ -5306,7 +5128,6 @@ classdef DataCleaningTool < matlab.apps.AppBase
 
         % Button pushed function: DeleteRowsTextButton
         function DeleteRowsTextButtonPushed(app, event)
-            %%%%%%%%%%%%%%%%%%%%
             % Changes background color to grey
             app.DeleteRowsTextButton.BackgroundColor = [0.65,0.65,0.65];
             pause(0.000001);
@@ -5333,7 +5154,7 @@ classdef DataCleaningTool < matlab.apps.AppBase
                             B = find(Tbl.(string(app.SelectedCellTextEditField.Value)) == string(app.UIBoxplotTextTable.ColumnName{colIndex}));
                             indices0{i} = intersect(A,B);
                         end
-                        indices = unique(cell2mat(indices0'))
+                        indices = unique(cell2mat(indices0'));
                         Tbl(indices,:) = [];
                         Tbl_true(indices,:) = [];
                         for i = 1:size(Tbl,2)
@@ -5347,7 +5168,7 @@ classdef DataCleaningTool < matlab.apps.AppBase
             end
             app.UITableTextRowIndices.Data = {};
             app.UITableTextColumnIndices.Data = {};
-            %%%%% 1 Current data tab %%%%%
+            % Current data widget
             % Displays the original table with column names
             
             % Undo
@@ -5394,7 +5215,7 @@ classdef DataCleaningTool < matlab.apps.AppBase
             varNames_text = Tbl_text.Properties.VariableNames;
             app.TextListBox.Items = string(varNames_text);
             
-            %%%%% 2 Data properties %%%%%
+            % 2 Data properties %
             writetable(Tbl_true,'filesize.csv')
             props = dir('filesize.csv');
             % Displays the file size in megabytes
@@ -5417,13 +5238,14 @@ classdef DataCleaningTool < matlab.apps.AppBase
             % Displays the number of deleted columns
             app.NumberOfDeletedColumnsEditField.Value = app.ActualNoOfColumnsEditField.Value - size(Tbl_true,2);
             % Missingness plot
-            A = ismissing(Tbl_true);
+            A = flip(ismissing(Tbl_true));
             imagesc(app.UIAxes6,A);
             cmap = winter(2);
             colormap(app.UIAxes7,cmap);
             app.UIAxes6.XTick = 1:length(varNames_true);
             app.UIAxes6.XTickLabel = varNames_true;
             app.UIAxes6.YTick = [1 size(Tbl_true,1)];
+            app.UIAxes6.YTickLabel = {string(size(Tbl_true,1)), '1'};
             app.UIAxes6.YDir = 'normal';
             % Displays the limits of two sliders
             app.DeleteRowsMinSlider.Limits = [1 size(Tbl_true,1)];
@@ -5443,7 +5265,7 @@ classdef DataCleaningTool < matlab.apps.AppBase
             app.UIAxes5.XTick = 0:length(varNames_true)-1;
             app.UIAxes5.XTickLabel = varNames_true;
             app.UIAxes5.YLim = [0 100];
-            %
+            
             d = zeros(1,length(varNames));
             if isempty(app.UITableNumericRowsDeleted.Data) == true
                 for i = 1:length(varNames_numeric)
@@ -5488,7 +5310,7 @@ classdef DataCleaningTool < matlab.apps.AppBase
             % Displays the number of deleted rows
             app.NumberOfDeletedRowsEditField.Value = app.ActualNoOfRowsEditField.Value - size(Tbl_true,1);
             
-            %%%%% 3 Numerical features tab %%%%%
+            % Numerical features widget
             % Descriptive statistics
             if app.NumberOfNumericalFeaturesEditField.Value ~= 0
                 a_numeric = zeros(1,size(Tbl_numeric,2));
@@ -5515,16 +5337,16 @@ classdef DataCleaningTool < matlab.apps.AppBase
                 app.UINumericTable.Data = {};
             end
             
-            %%%%% 4 Datetime features tab %%%%%
+            % Datetime features widget
             % Descriptive statistics
             if app.NumberOfDateTimeFeaturesEditField.Value ~= 0
-                a_datetime = {};
-                c_datetime = {};
+                a_datetime = cell([1 size(Tbl_datetime,2)]);
+                c_datetime = cell([1 size(Tbl_datetime,2)]);
                 DatesAndTimes = repmat({'Select'},size(Tbl_datetime,2),1);
                 l_datetime = repmat({'Select'},size(Tbl_datetime,2),1);
                 g_datetime = repmat({'Select'},size(Tbl_datetime,2),1);
-                e_datetime = {};
-                f_datetime = {};
+                e_datetime = cell([1 size(Tbl_datetime,2)]);
+                f_datetime = cell([1 size(Tbl_datetime,2)]);
                 for i = 1:size(Tbl_datetime,2)
                     a_datetime{i}=min(Tbl_datetime{:,i});
                     c_datetime{i}=max(Tbl_datetime{:,i});
@@ -5541,7 +5363,7 @@ classdef DataCleaningTool < matlab.apps.AppBase
                 app.UIDatetimeTable.Data = {};
             end
             
-            %%%%% 5 Text features tab %%%%%
+            % Text features widget
             % Descriptive statistics
             if app.NumberOfTextFeaturesEditField.Value ~= 0
                 a_text = {};
@@ -5557,32 +5379,23 @@ classdef DataCleaningTool < matlab.apps.AppBase
                 app.UITextTable.Data = {};
             end
             
-            %%%%% 6 Imputation tab %%%%%
+            % Imputation widget
             % Displays missing data percentage to be imputed
             app.PercentageofMissingDataEditField.Value = round((length(find(ismissing(Tbl_true)==1))/numel(Tbl_true))*100,2);
-            noofrows = app.NumberOfRowsEditField.Value;
-            noofcolumns = app.NumberOfColumnsEditField.Value;
-            noofnumericalfeatures = app.NumberOfNumericalFeaturesEditField.Value;
-            noofcategoricalfeatures = app.NumberOfTextFeaturesEditField.Value;
-            missingpercentagetobeimputed = app.PercentageofMissingDataEditField.Value;
-            [NRSME_pred,PEC_pred] = Interpolation(app,noofrows,noofcolumns,missingpercentagetobeimputed,noofnumericalfeatures,noofcategoricalfeatures);
-            % Displays expected error of imputation for numerical features
-            app.ExpectedErrorofImputationforNumericalFeaturesEditField.Value = NRSME_pred;
-            % Displays expected error of imputation for categorical features
-            app.ExpectedErrorofImputationforCategoricalFeaturesEditField.Value = PEC_pred;
             % Missing observations percentage table
             app.UIMissingObservationsTable_2.Data = t;
             % Missingness plot
-            A = ismissing(Tbl_true);
+            A = flip(ismissing(Tbl_true));
             imagesc(app.UIAxes8,A);
             cmap = winter(2);
             colormap(app.UIAxes9,cmap);
             app.UIAxes8.XTick = 1:length(varNames_true);
             app.UIAxes8.XTickLabel = varNames_true;
             app.UIAxes8.YTick = [1 size(Tbl_true,1)];
+            app.UIAxes8.YTickLabel = {string(size(Tbl_true,1)), '1'};
             app.UIAxes8.YDir = 'normal';
             
-            %%%%% 7 Data transformation tab %%%%%
+            % Data transformation widget
             app.SelectNumericalFeaturesListBox.Items = string(varNames_numeric);
             
             % Last modified time
@@ -5594,18 +5407,16 @@ classdef DataCleaningTool < matlab.apps.AppBase
 
         % Button pushed function: DeleteRowsDatetimeButton
         function DeleteRowsDatetimeButtonPushed(app, event)
-            %%%%%%%%%%%%%%%%%%%%
             % Changes background color to cyan
             app.DeleteRowsDatetimeButton.BackgroundColor = [0.65,0.65,0.65];
             pause(0.000001);
             
-            %%%%% 1 Update less than features %%%%%
+            % 1 Update less than features %
             Tbl_true = app.UIMainTable.Data;
             varNames_true = Tbl_true.Properties.VariableNames;
             Tbl = removevars(Tbl_true,app.IdListBox.Items);
             varNames = Tbl.Properties.VariableNames;
             array_datetime = varfun(@isdatetime,Tbl,'output','uniform');
-            index_datetime = find(array_datetime==1);
             index_notdatetime = find(array_datetime==0);
             Tbl_datetime = removevars(Tbl,index_notdatetime);
             varNames_datetime = Tbl_datetime.Properties.VariableNames;
@@ -5644,13 +5455,12 @@ classdef DataCleaningTool < matlab.apps.AppBase
             end
             app.UIMainTable.Data = Tbl_true;
             
-            %%%%% 2 Update greater than features %%%%%
+            % 2 Update greater than features %
             Tbl_true = app.UIMainTable.Data;
             varNames_true = Tbl_true.Properties.VariableNames;
             Tbl = removevars(Tbl_true,app.IdListBox.Items);
             varNames = Tbl.Properties.VariableNames;
             array_datetime = varfun(@isdatetime,Tbl,'output','uniform');
-            index_datetime = find(array_datetime==1);
             index_notdatetime = find(array_datetime==0);
             Tbl_datetime = removevars(Tbl,index_notdatetime);
             varNames_datetime = Tbl_datetime.Properties.VariableNames;
@@ -5689,13 +5499,12 @@ classdef DataCleaningTool < matlab.apps.AppBase
             end
             app.UIMainTable.Data = Tbl_true;
             
-            %%%%% 1 Update range %%%%%
+            % 1 Update range %
             Tbl_true = app.UIMainTable.Data;
             varNames_true = Tbl_true.Properties.VariableNames;
             Tbl = removevars(Tbl_true,app.IdListBox.Items);
             varNames = Tbl.Properties.VariableNames;
             array_datetime = varfun(@isdatetime,Tbl,'output','uniform');
-            index_datetime = find(array_datetime==1);
             index_notdatetime = find(array_datetime==0);
             Tbl_datetime = removevars(Tbl,index_notdatetime);
             varNames_datetime = Tbl_datetime.Properties.VariableNames;
@@ -5722,7 +5531,7 @@ classdef DataCleaningTool < matlab.apps.AppBase
             end
             app.UIMainTable.Data = Tbl_true;
             
-            %%%%% 1 Current data tab %%%%%
+            % Current data tab
             % Displays the original table with column names
             % Undo
             Tbl_true = app.UIMainTable.Data;
@@ -5768,7 +5577,7 @@ classdef DataCleaningTool < matlab.apps.AppBase
             varNames_text = Tbl_text.Properties.VariableNames;
             app.TextListBox.Items = string(varNames_text);
             
-            %%%%% 2 Data properties tab %%%%%
+            % Data properties tab
             writetable(Tbl_true,'filesize.csv')
             props = dir('filesize.csv');
             % Displays the file size in megabytes
@@ -5791,13 +5600,14 @@ classdef DataCleaningTool < matlab.apps.AppBase
             % Displays the number of deleted columns
             app.NumberOfDeletedColumnsEditField.Value = app.ActualNoOfColumnsEditField.Value - size(Tbl_true,2);
             % Missingness plot
-            A = ismissing(Tbl_true);
+            A = flip(ismissing(Tbl_true));
             imagesc(app.UIAxes6,A);
             cmap = winter(2);
             colormap(app.UIAxes7,cmap);
             app.UIAxes6.XTick = 1:length(varNames_true);
             app.UIAxes6.XTickLabel = varNames_true;
             app.UIAxes6.YTick = [1 size(Tbl_true,1)];
+            app.UIAxes6.YTickLabel = {string(size(Tbl_true,1)), '1'};
             app.UIAxes6.YDir = 'normal';
             % Displays the limits of two sliders
             app.DeleteRowsMinSlider.Limits = [1 size(Tbl_true,1)];
@@ -5851,7 +5661,7 @@ classdef DataCleaningTool < matlab.apps.AppBase
             % Displays the number of deleted rows
             app.NumberOfDeletedRowsEditField.Value = app.ActualNoOfRowsEditField.Value - size(Tbl_true,1);
             
-            %%%%% 3 Numerical features tab %%%%%
+            % Numerical features widget
             % Descriptive statistics
             if app.NumberOfNumericalFeaturesEditField.Value ~= 0
                 a_numeric = zeros(1,size(Tbl_numeric,2));
@@ -5878,16 +5688,16 @@ classdef DataCleaningTool < matlab.apps.AppBase
                 app.UINumericTable.Data = {};
             end
             
-            %%%%% 4 Datetime features tab %%%%%
+            % Datetime features tab
             % Descriptive statistics
             if app.NumberOfDateTimeFeaturesEditField.Value ~= 0
-                a_datetime = {};
-                c_datetime = {};
+                a_datetime = cell([1 size(Tbl_datetime,2)]);
+                c_datetime = cell([1 size(Tbl_datetime,2)]);
                 DatesAndTimes = repmat({'Select'},size(Tbl_datetime,2),1);
                 l_datetime = repmat({'Select'},size(Tbl_datetime,2),1);
                 g_datetime = repmat({'Select'},size(Tbl_datetime,2),1);
-                e_datetime = {};
-                f_datetime = {};
+                e_datetime = cell([1 size(Tbl_datetime,2)]);
+                f_datetime = cell([1 size(Tbl_datetime,2)]);
                 for i = 1:size(Tbl_datetime,2)
                     a_datetime{i}=min(Tbl_datetime{:,i});
                     c_datetime{i}=max(Tbl_datetime{:,i});
@@ -5904,7 +5714,7 @@ classdef DataCleaningTool < matlab.apps.AppBase
                 app.UIDatetimeTable.Data = {};
             end
             
-            %%%%% 5 Text features tab %%%%%
+            % Text features tab
             % Descriptive statistics
             if app.NumberOfTextFeaturesEditField.Value ~= 0
                 a_text = {};
@@ -5920,35 +5730,26 @@ classdef DataCleaningTool < matlab.apps.AppBase
                 app.UITextTable.Data = {};
             end
             
-            %%%%% 6 Imputation tab %%%%%
+            % Imputation widget
             % Displays missing data percentage to be imputed
             app.PercentageofMissingDataEditField.Value = round((length(find(ismissing(Tbl_true)==1))/numel(Tbl_true))*100,2);
-            noofrows = app.NumberOfRowsEditField.Value;
-            noofcolumns = app.NumberOfColumnsEditField.Value;
-            noofnumericalfeatures = app.NumberOfNumericalFeaturesEditField.Value;
-            noofcategoricalfeatures = app.NumberOfTextFeaturesEditField.Value;
-            missingpercentagetobeimputed = app.PercentageofMissingDataEditField.Value;
-            [NRSME_pred,PEC_pred] = Interpolation(app,noofrows,noofcolumns,missingpercentagetobeimputed,noofnumericalfeatures,noofcategoricalfeatures);
-            % Displays expected error of imputation for numerical features
-            app.ExpectedErrorofImputationforNumericalFeaturesEditField.Value = NRSME_pred;
-            % Displays expected error of imputation for categorical features
-            app.ExpectedErrorofImputationforCategoricalFeaturesEditField.Value = PEC_pred;
             % Missing observations percentage table
             app.UIMissingObservationsTable_2.Data = t;
             % Missingness plot
-            A = ismissing(Tbl_true);
+            A = flip(ismissing(Tbl_true));
             imagesc(app.UIAxes8,A);
             cmap = winter(2);
             colormap(app.UIAxes9,cmap);
             app.UIAxes8.XTick = 1:length(varNames_true);
             app.UIAxes8.XTickLabel = varNames_true;
             app.UIAxes8.YTick = [1 size(Tbl_true,1)];
+            app.UIAxes8.YTickLabel = {string(size(Tbl_true,1)), '1'};
             app.UIAxes8.YDir = 'normal';
             
-            %%%%% 7 Data transformation tab %%%%%
+            % Data transformation widget
             app.SelectNumericalFeaturesListBox.Items = string(varNames_numeric);
             
-            % plots updated histogram of the selected cell
+            % Plots updated histogram of the selected cell
             T = app.SelectedCellDatetimeEditField.Value;
             histogram(app.UIAxes4_3,Tbl_datetime.(T))
             app.UIAxes4_3.XLabel.Interpreter = 'latex';
@@ -5968,7 +5769,6 @@ classdef DataCleaningTool < matlab.apps.AppBase
 
         % Button pushed function: HelpButton
         function HelpButtonPushed(app, event)
-            %%%%%%%%%%%%%%%%%%%%
             % Changes background color to grey
             app.HelpButton.BackgroundColor = [0.65,0.65,0.65];
             pause(0.000001);
@@ -5983,7 +5783,6 @@ classdef DataCleaningTool < matlab.apps.AppBase
 
         % Button pushed function: ResizeButton
         function ResizeButtonPushed(app, event)
-            %%%%%%%%%%%%%%%%%%%%
             % Changes background color to grey
             app.ResizeButton.BackgroundColor = [0.65,0.65,0.65];
             pause(0.000001);
@@ -6008,33 +5807,18 @@ classdef DataCleaningTool < matlab.apps.AppBase
 
         % Button pushed function: ConverttoExcelDATEVALUEButton
         function ConverttoExcelDATEVALUEButtonPushed(app, event)
-            %%%%%%%%%%%%%%%%%%%%
             % Changes background color to grey
             app.ConverttoExcelDATEVALUEButton.BackgroundColor = [0.65,0.65,0.65];
             pause(0.000001);
             
             % Change datetime format
             Tbl = app.UIMainTable.Data;
-            varNames = Tbl.Properties.VariableNames;
             
-            % Extract numerical features
-            array_numeric = varfun(@isnumeric,Tbl,'output','uniform');
-            index_notnumeric = find(array_numeric==0);
-            Tbl_numeric = removevars(Tbl,index_notnumeric);
-            varNames_numeric = Tbl_numeric.Properties.VariableNames;
             % Extract date/time features
             array_datetime = varfun(@isdatetime,Tbl,'output','uniform');
             index_notdatetime = find(array_datetime==0);
             Tbl_datetime = removevars(Tbl,index_notdatetime);
             varNames_datetime = Tbl_datetime.Properties.VariableNames;
-            % Extract text features
-            array_numeric = varfun(@isnumeric,Tbl,'output','uniform');
-            array_datetime = varfun(@isdatetime,Tbl,'output','uniform');
-            index_numeric = find(array_numeric==1);
-            index_datetime = find(array_datetime==1);
-            index_nottext = [index_numeric index_datetime];
-            Tbl_text = removevars(Tbl,index_nottext);
-            varNames_text = Tbl_text.Properties.VariableNames;
             
             DateNum = {};
             A = zeros(size(Tbl_datetime));
@@ -6044,12 +5828,12 @@ classdef DataCleaningTool < matlab.apps.AppBase
             end
             
             Tbl = app.UIMainTable.Data;
-            Tbl_new = removevars(Tbl,varNames_datetime)
+            Tbl_new = removevars(Tbl,varNames_datetime);
             Tbl1 = [Tbl_new array2table(A,'VariableNames',varNames_datetime)];
             app.UIMainTable.Data = Tbl1;
             app.UIMainTable.ColumnName = [Tbl_new.Properties.VariableNames varNames_datetime];
             
-            %%%%% 1 Current data tab %%%%%
+            % Current data widget
             % Displays the original table with column names
             
             % Undo
@@ -6066,7 +5850,6 @@ classdef DataCleaningTool < matlab.apps.AppBase
             app.UndoButton.BackgroundColor = [0.22 0.44 0.55];
             % Update
             Tbl = removevars(Tbl_true,app.IdListBox.Items);
-            varNames = Tbl.Properties.VariableNames;
             if l==0
                 fname1 = sprintf('saveddata/%s_updated.mat', app.EditField_7.Value);
             else
@@ -6096,7 +5879,7 @@ classdef DataCleaningTool < matlab.apps.AppBase
             varNames_text = Tbl_text.Properties.VariableNames;
             app.TextListBox.Items = string(varNames_text);
             
-            %%%%% 2 Data properties tab %%%%%
+            % Data properties widget
             writetable(Tbl_true,'filesize.csv','Delimiter',',')
             props = dir('filesize.csv');
             % Displays the file size in megabytes
@@ -6119,13 +5902,14 @@ classdef DataCleaningTool < matlab.apps.AppBase
             % Displays the number of deleted columns
             app.NumberOfDeletedColumnsEditField.Value = app.ActualNoOfColumnsEditField.Value - size(Tbl_true,2);
             % Missingness plot
-            A = ismissing(Tbl_true);
+            A = flip(ismissing(Tbl_true));
             imagesc(app.UIAxes6,A);
             cmap = winter(2);
             colormap(app.UIAxes7,cmap);
             app.UIAxes6.XTick = 1:length(varNames_true);
             app.UIAxes6.XTickLabel = varNames_true;
             app.UIAxes6.YTick = [1 size(Tbl_true,1)];
+            app.UIAxes6.YTickLabel = {string(size(Tbl_true,1)), '1'};
             app.UIAxes6.YDir = 'normal';
             % Displays the limits of two sliders
             app.DeleteRowsMinSlider.Limits = [1 size(Tbl_true,1)];
@@ -6146,7 +5930,7 @@ classdef DataCleaningTool < matlab.apps.AppBase
             app.UIAxes5.XTickLabel = varNames_true;
             app.UIAxes5.YLim = [0 100];
             
-            %%%%% 3 Numerical features tab %%%%%
+            % Numerical features widget
             % Descriptive statistics
             if app.NumberOfNumericalFeaturesEditField.Value ~= 0
                 a_numeric = zeros(1,size(Tbl_numeric,2));
@@ -6173,16 +5957,16 @@ classdef DataCleaningTool < matlab.apps.AppBase
                 app.UINumericTable.Data = {};
             end
             
-            %%%%% 4 Datetime features tab %%%%%
+            % Datetime features widget
             % Descriptive statistics
             if app.NumberOfDateTimeFeaturesEditField.Value ~= 0
-                a_datetime = {};
-                c_datetime = {};
+                a_datetime = cell([1 size(Tbl_datetime,2)]);
+                c_datetime = cell([1 size(Tbl_datetime,2)]);
                 DatesAndTimes = repmat({'Select'},size(Tbl_datetime,2),1);
                 l_datetime = repmat({'Select'},size(Tbl_datetime,2),1);
                 g_datetime = repmat({'Select'},size(Tbl_datetime,2),1);
-                e_datetime = {};
-                f_datetime = {};
+                e_datetime = cell([1 size(Tbl_datetime,2)]);
+                f_datetime = cell([1 size(Tbl_datetime,2)]);
                 for i = 1:size(Tbl_datetime,2)
                     a_datetime{i}=min(Tbl_datetime{:,i});
                     c_datetime{i}=max(Tbl_datetime{:,i});
@@ -6199,7 +5983,7 @@ classdef DataCleaningTool < matlab.apps.AppBase
                 app.UIDatetimeTable.Data = {};
             end
             
-            %%%%% 5 Text features tab %%%%%
+            % Text features widget
             % Descriptive statistics
             if app.NumberOfTextFeaturesEditField.Value ~= 0
                 a_text = {};
@@ -6215,10 +5999,10 @@ classdef DataCleaningTool < matlab.apps.AppBase
                 app.UITextTable.Data = {};
             end
             
-            %%%%% 6 Data transformation tab %%%%%
+            % Data transformation widget
             app.SelectNumericalFeaturesListBox.Items = string(varNames_numeric);
             
-            %%%%% 7 Imputation tab %%%%%
+            % Imputation widget
             app.PercentageofMissingDataEditField.Value = round((length(find(ismissing(Tbl_true)==1))/numel(Tbl_true))*100,2);
             
             % Last modified time
@@ -6231,7 +6015,6 @@ classdef DataCleaningTool < matlab.apps.AppBase
         % Button pushed function: 
         % ImportDatawithFeaturesinColumnsButton
         function ImportDatawithFeaturesinColumnsButtonPushed(app, event)
-            %%%%%%%%%%%%%%%%%%%%
             % Changes background color to grey
             app.ImportDatawithFeaturesinColumnsButton.BackgroundColor = [0.65,0.65,0.65];
             pause(0.000001);
@@ -6248,16 +6031,15 @@ classdef DataCleaningTool < matlab.apps.AppBase
             else
                 % Displays file path name
                 app.ImportDataEditField.Value = fullname;
-                [FILEPATH,NAME,EXT] = fileparts(filename);
+                [~,NAME,~] = fileparts(filename);
                 % Extracts the name of the file only
                 app.EditField_7.Value = NAME;
                 % Reads the file with header as a table with column names
                 opts = detectImportOptions(fullname,'NumHeaderLines',0);
                 format long
                 Tbl = readtable(fullname,opts);
-                varNames = Tbl.Properties.VariableNames;
                 
-                %%%%% 1 Current data tab %%%%%
+                % Current data widget
                 % Displays the original table with column names
                 app.UIMainTable.Data = Tbl;
                 app.UIMainTable.ColumnName = Tbl.Properties.VariableNames;
@@ -6308,7 +6090,7 @@ classdef DataCleaningTool < matlab.apps.AppBase
                 app.ActualNoOfRowsEditField.Value = size(Tbl,1);
                 app.ActualNoOfColumnsEditField.Value = size(Tbl,2);
                 
-                %%%%% 2 Data properties tab %%%%%
+                % Data properties widget
                 % Displays the file size in megabytes
                 props = dir(fullname);
                 app.FileSizeinMBEditField.Value = round(props.bytes/(1024^2),3);
@@ -6327,13 +6109,14 @@ classdef DataCleaningTool < matlab.apps.AppBase
                 % Displays the number of duplicate columns
                 app.NumberOfDuplicateColumnsEditField.Value = HasRepeatedColumns(app, Tbl_numeric);
                 % Missingness plot
-                A = ismissing(Tbl_true);
+                A = flip(ismissing(Tbl_true));
                 imagesc(app.UIAxes6,A);
                 cmap = winter(2);
                 colormap(app.UIAxes6,cmap);
                 app.UIAxes6.XTick = 1:length(varNames_true);
                 app.UIAxes6.XTickLabel = varNames_true;
                 app.UIAxes6.YTick = [1 size(Tbl_true,1)];
+                app.UIAxes6.YTickLabel = {string(size(Tbl_true,1)),'1'};
                 app.UIAxes6.YDir = 'normal';
                 colormap(app.UIAxes7,cmap);
                 cb = colorbar(app.UIAxes7,'south','FontSize',8,'Limits',[0 1],'Ticks',[0 1],'TickLabels',{'Observed','Missing'});
@@ -6359,7 +6142,7 @@ classdef DataCleaningTool < matlab.apps.AppBase
                 app.UIAxes5.XTickLabel = varNames;
                 app.UIAxes5.YLim = [0 100];
                 
-                %%%%% 3 Numerical features tab %%%%%
+                % Numerical features widget
                 % Descriptive statistics
                 if app.NumberOfNumericalFeaturesEditField.Value ~= 0
                     a_numeric = zeros(1,size(Tbl_numeric,2));
@@ -6386,16 +6169,16 @@ classdef DataCleaningTool < matlab.apps.AppBase
                     app.UINumericTable.Data = {};
                 end
                 
-                %%%%% 4 Datetime features tab %%%%%
+                % Datetime features widget
                 % Descriptive statistics
                 if app.NumberOfDateTimeFeaturesEditField.Value ~= 0
-                    a_datetime = {};
-                    c_datetime = {};
+                    a_datetime = cell([1 size(Tbl_datetime,2)]);
+                    c_datetime = cell([1 size(Tbl_datetime,2)]);
                     DatesAndTimes = repmat({'Select'},size(Tbl_datetime,2),1);
                     l_datetime = repmat({'Select'},size(Tbl_datetime,2),1);
                     g_datetime = repmat({'Select'},size(Tbl_datetime,2),1);
-                    e_datetime = {};
-                    f_datetime = {};
+                    e_datetime = cell([1 size(Tbl_datetime,2)]);
+                    f_datetime = cell([1 size(Tbl_datetime,2)]);
                     for i = 1:size(Tbl_datetime,2)
                         a_datetime{i}=min(Tbl_datetime{:,i});
                         c_datetime{i}=max(Tbl_datetime{:,i});
@@ -6412,7 +6195,7 @@ classdef DataCleaningTool < matlab.apps.AppBase
                     app.UIDatetimeTable.Data = {};
                 end
                 
-                %%%%% 5 Text features tab %%%%%
+                % Text features widget
                 % Descriptive statistics
                 if app.NumberOfTextFeaturesEditField.Value ~= 0
                     a_text = {};
@@ -6428,33 +6211,24 @@ classdef DataCleaningTool < matlab.apps.AppBase
                     app.UITextTable.Data = {};
                 end
                 
-                %%%%% 6 Imputation tab %%%%%
+                % Imputation widget
                 % Displays missing data percentage to be imputed
                 app.PercentageofMissingDataEditField.Value = round((length(find(ismissing(Tbl_true)==1))/numel(Tbl_true))*100,2);
-                noofrows = app.NumberOfRowsEditField.Value;
-                noofcolumns = app.NumberOfColumnsEditField.Value;
-                noofnumericalfeatures = app.NumberOfNumericalFeaturesEditField.Value;
-                noofcategoricalfeatures = app.NumberOfTextFeaturesEditField.Value;
-                missingpercentagetobeimputed = app.PercentageofMissingDataEditField.Value;
-                [NRSME_pred,PEC_pred] = Interpolation(app,noofrows,noofcolumns,missingpercentagetobeimputed,noofnumericalfeatures,noofcategoricalfeatures);
-                % Displays expected error of imputation for numerical features
-                app.ExpectedErrorofImputationforNumericalFeaturesEditField.Value = NRSME_pred;
-                % Displays expected error of imputation for categorical features
-                app.ExpectedErrorofImputationforCategoricalFeaturesEditField.Value = PEC_pred;
                 % Missing observations percentage table
                 app.UIMissingObservationsTable_2.Data = t;
                 % Missingness plot
-                A = ismissing(Tbl_true);
+                A = flip(ismissing(Tbl_true));
                 imagesc(app.UIAxes8,A);
                 cmap = winter(2);
                 colormap(app.UIAxes8,cmap);
                 app.UIAxes8.XTick = 1:length(varNames_true);
                 app.UIAxes8.XTickLabel = varNames_true;
                 app.UIAxes8.YTick = [1 size(Tbl_true,1)];
+                app.UIAxes8.YTickLabel = {string(size(Tbl_true,1)), '1'};
                 app.UIAxes8.YDir = 'normal';
                 colormap(app.UIAxes9,cmap);
                 
-                %%%%% 7 Data transformation tab %%%%%
+                % Data transformation widget
                 app.SelectNumericalFeaturesListBox.Items = string(varNames_numeric);
                 
                 % Last modified time
@@ -6467,7 +6241,6 @@ classdef DataCleaningTool < matlab.apps.AppBase
 
         % Button pushed function: FeatureNamesButton
         function FeatureNamesButtonPushed(app, event)
-            %%%%%%%%%%%%%%%%%%%%
             % Changes background color to grey
             app.FeatureNamesButton.BackgroundColor = [0.65,0.65,0.65];
             pause(0.000001);
@@ -6490,7 +6263,7 @@ classdef DataCleaningTool < matlab.apps.AppBase
             app.FeatureNamesEditField.Value = app.DropDown_5.Value;
             app.DropDown_5.Value = 'Select';
             
-            %%%%% 1 Current data tab %%%%%
+            % Current data tab
             % Displays the original table with column names
             app.UIMainTable.Data = Tbl;
             app.UIMainTable.ColumnName = Tbl.Properties.VariableNames;
@@ -6509,7 +6282,6 @@ classdef DataCleaningTool < matlab.apps.AppBase
             app.UndoButton.BackgroundColor = [0.22 0.44 0.55];
             % Update
             Tbl = removevars(Tbl_true,app.IdListBox.Items);
-            varNames = Tbl.Properties.VariableNames;
             if l==0
                 fname1 = sprintf('saveddata/%s_updated.mat', app.EditField_7.Value);
             else
@@ -6540,20 +6312,21 @@ classdef DataCleaningTool < matlab.apps.AppBase
             varNames_text = Tbl_text.Properties.VariableNames;
             app.TextListBox.Items = string(varNames_text);
             
-            %%%%% 2 Data properties tab %%%%%
+            % Data properties widget
             writetable(Tbl_true,'filesize.csv')
             props = dir('filesize.csv');
             % Displays the file size in megabytes
             app.FileSizeinMBEditField.Value = round(props.bytes/(1024^2),3);
             delete('filesize.csv');
             % Missingness plot
-            A = ismissing(Tbl_true);
+            A = flip(ismissing(Tbl_true));
             imagesc(app.UIAxes6,A);
             cmap = winter(2);
             colormap(app.UIAxes7,cmap);
             app.UIAxes6.XTick = 1:length(varNames_true);
             app.UIAxes6.XTickLabel = varNames_true;
             app.UIAxes6.YTick = [1 size(Tbl,1)];
+            app.UIAxes6.YTickLabel = {string(size(Tbl,1)), '1'};
             app.UIAxes6.YDir = 'normal';
             % Missing obervations percentage table
             m =  GetMissingData(app, Tbl_true);
@@ -6565,7 +6338,7 @@ classdef DataCleaningTool < matlab.apps.AppBase
             app.UIAxes5.XTickLabel = varNames_true;
             app.UIAxes5.YLim = [0 100];
             
-            %%%%% 3 Numerical features tab %%%%%
+            % Numerical features widget
             % Descriptive statistics
             if app.NumberOfNumericalFeaturesEditField.Value ~= 0
                 a_numeric = zeros(1,size(Tbl_numeric,2));
@@ -6592,16 +6365,16 @@ classdef DataCleaningTool < matlab.apps.AppBase
                 app.UINumericTable.Data = {};
             end
             
-            %%%%% 4 Datetime features tab %%%%%
+            % Datetime features widget
             % Descriptive statistics
             if app.NumberOfDateTimeFeaturesEditField.Value ~= 0
-                a_datetime = {};
-                c_datetime = {};
+                a_datetime = cell([1 size(Tbl_datetime,2)]);
+                c_datetime = cell([1 size(Tbl_datetime,2)]);
                 DatesAndTimes = repmat({'Select'},size(Tbl_datetime,2),1);
                 l_datetime = repmat({'Select'},size(Tbl_datetime,2),1);
                 g_datetime = repmat({'Select'},size(Tbl_datetime,2),1);
-                e_datetime = {};
-                f_datetime = {};
+                e_datetime = cell([1 size(Tbl_datetime,2)]);
+                f_datetime = cell([1 size(Tbl_datetime,2)]);
                 for i = 1:size(Tbl_datetime,2)
                     a_datetime{i}=min(Tbl_datetime{:,i});
                     c_datetime{i}=max(Tbl_datetime{:,i});
@@ -6616,7 +6389,7 @@ classdef DataCleaningTool < matlab.apps.AppBase
                 app.UIDatetimeTable.Data = t2;
             end
             
-            %%%%% 5 Text features tab %%%%%
+            % Text features widget
             % Descriptive statistics
             if app.NumberOfTextFeaturesEditField.Value ~= 0
                 a_text = {};
@@ -6639,25 +6412,12 @@ classdef DataCleaningTool < matlab.apps.AppBase
 
         % Button pushed function: LabelEncodingButton
         function LabelEncodingButtonPushed(app, event)
-            %%%%%%%%%%%%%%%%%%%%
             % Changes background color to grey
             app.LabelEncodingButton.BackgroundColor = [0.65,0.65,0.65];
             pause(0.000001);
-            
-            % Present table
-            Tbl_true = app.UIMainTable.Data;
-            varNames_true = Tbl_true.Properties.VariableNames;
-            Tbl = removevars(Tbl_true,app.IdListBox.Items);
-            varNames = Tbl.Properties.VariableNames;
-            array_numeric = varfun(@isnumeric,Tbl,'output','uniform');
-            array_datetime = varfun(@isdatetime,Tbl,'output','uniform');
-            index_numeric = find(array_numeric==1);
-            index_datetime = find(array_datetime==1);
-            index_nottext = [index_numeric index_datetime];
-            Tbl_text = removevars(Tbl,index_nottext);
-            varNames_text = Tbl_text.Properties.VariableNames;
-            
+           
             if isempty(app.UITextTable.Data) == false
+                % Present table
                 Tbl = app.UIMainTable.Data;
                 Tbl_new = removevars(Tbl,string(app.SelectedCellTextEditField.Value));
                 Tbl1 = [Tbl_new GetTable3(app, Tbl.(string(app.SelectedCellTextEditField.Value)), string(app.SelectedCellTextEditField.Value))];
@@ -6670,7 +6430,7 @@ classdef DataCleaningTool < matlab.apps.AppBase
                 app.UIAxes3_4.cla;
             end
             
-            %%%%% 1 Current data tab %%%%%
+            % Current data widget
             % Displays the original table with column names
             % Undo
             Tbl_true = app.UIMainTable.Data;
@@ -6686,7 +6446,6 @@ classdef DataCleaningTool < matlab.apps.AppBase
             app.UndoButton.BackgroundColor = [0.22 0.44 0.55];
             % Update
             Tbl = removevars(Tbl_true,app.IdListBox.Items);
-            varNames = Tbl.Properties.VariableNames;
             if l==0
                 fname1 = sprintf('saveddata/%s_updated.mat', app.EditField_7.Value);
             else
@@ -6716,7 +6475,7 @@ classdef DataCleaningTool < matlab.apps.AppBase
             varNames_text = Tbl_text.Properties.VariableNames;
             app.TextListBox.Items = string(varNames_text);
             
-            %%%%% 2 Data properties tab %%%%%
+            % Data properties widget
             writetable(Tbl_true,'filesize.csv')
             props = dir('filesize.csv');
             % Displays the file size in megabytes
@@ -6739,13 +6498,14 @@ classdef DataCleaningTool < matlab.apps.AppBase
             % Displays the number of deleted columns
             app.NumberOfDeletedColumnsEditField.Value = app.ActualNoOfColumnsEditField.Value - size(Tbl_true,2);
             % Missingness plot
-            A = ismissing(Tbl_true);
+            A = flip(ismissing(Tbl_true));
             imagesc(app.UIAxes6,A);
             cmap = winter(2);
             colormap(app.UIAxes7,cmap);
             app.UIAxes6.XTick = 1:length(varNames_true);
             app.UIAxes6.XTickLabel = varNames_true;
             app.UIAxes6.YTick = [1 size(Tbl_true,1)];
+            app.UIAxes6.YTickLabel = {string(size(Tbl_true,1)), '1'};
             app.UIAxes6.YDir = 'normal';
             app.UIAxes7.cla;
             % Displays the limits of two sliders
@@ -6767,7 +6527,7 @@ classdef DataCleaningTool < matlab.apps.AppBase
             app.UIAxes5.XTickLabel = varNames_true;
             app.UIAxes5.YLim = [0 100];
             
-            %%%%% 3 Numerical features tab %%%%%
+            % Numerical features widget
             % Descriptive statistics
             if app.NumberOfNumericalFeaturesEditField.Value ~= 0
                 a_numeric = zeros(1,size(Tbl_numeric,2));
@@ -6794,16 +6554,16 @@ classdef DataCleaningTool < matlab.apps.AppBase
                 app.UINumericTable.Data = {};
             end
             
-            %%%%% 4 Datetime features tab %%%%%
+            % Datetime features widget
             % Descriptive statistics
             if app.NumberOfDateTimeFeaturesEditField.Value ~= 0
-                a_datetime = {};
-                c_datetime = {};
+                a_datetime = cell([1 size(Tbl_datetime,2)]);
+                c_datetime = cell([1 size(Tbl_datetime,2)]);
                 DatesAndTimes = repmat({'Select'},size(Tbl_datetime,2),1);
                 l_datetime = repmat({'Select'},size(Tbl_datetime,2),1);
                 g_datetime = repmat({'Select'},size(Tbl_datetime,2),1);
-                e_datetime = {};
-                f_datetime = {};
+                e_datetime = cell([1 size(Tbl_datetime,2)]);
+                f_datetime = cell([1 size(Tbl_datetime,2)]);
                 for i = 1:size(Tbl_datetime,2)
                     a_datetime{i}=min(Tbl_datetime{:,i});
                     c_datetime{i}=max(Tbl_datetime{:,i});
@@ -6820,7 +6580,7 @@ classdef DataCleaningTool < matlab.apps.AppBase
                 app.UIDatetimeTable.Data = {};
             end
             
-            %%%%% 5 Text features tab %%%%%
+            % Text features widget
             % Descriptive statistics
             if app.NumberOfTextFeaturesEditField.Value ~= 0
                 a_text = {};
@@ -6836,32 +6596,23 @@ classdef DataCleaningTool < matlab.apps.AppBase
                 app.UITextTable.Data = {};
             end
             
-            %%%%% 6 Imputation tab %%%%%
+            % Imputation widget
             % Displays missing data percentage to be imputed
             app.PercentageofMissingDataEditField.Value = round((length(find(ismissing(Tbl_true)==1))/numel(Tbl_true))*100,2);
-            noofrows = app.NumberOfRowsEditField.Value;
-            noofcolumns = app.NumberOfColumnsEditField.Value;
-            noofnumericalfeatures = app.NumberOfNumericalFeaturesEditField.Value;
-            noofcategoricalfeatures = app.NumberOfTextFeaturesEditField.Value;
-            missingpercentagetobeimputed = app.PercentageofMissingDataEditField.Value;
-            [NRSME_pred,PEC_pred] = Interpolation(app,noofrows,noofcolumns,missingpercentagetobeimputed,noofnumericalfeatures,noofcategoricalfeatures);
-            % Displays expected error of imputation for numerical features
-            app.ExpectedErrorofImputationforNumericalFeaturesEditField.Value = NRSME_pred;
-            % Displays expected error of imputation for categorical features
-            app.ExpectedErrorofImputationforCategoricalFeaturesEditField.Value = PEC_pred;
             % Missing observations percentage table
             app.UIMissingObservationsTable_2.Data = t;
             % Missingness plot
-            A = ismissing(Tbl_true);
+            A = flip(ismissing(Tbl_true));
             imagesc(app.UIAxes8,A);
             cmap = winter(2);
             colormap(app.UIAxes9,cmap);
             app.UIAxes8.XTick = 1:length(varNames_true);
             app.UIAxes8.XTickLabel = varNames_true;
             app.UIAxes8.YTick = [1 size(Tbl_true,1)];
+            app.UIAxes8.YTickLabel = {string(size(Tbl_true,1)), '1'};
             app.UIAxes8.YDir = 'normal';
             
-            %%%%% 7 Data transformation tab %%%%%
+            % Data transformation widget
             app.SelectNumericalFeaturesListBox.Items = string(varNames_numeric);
             
             % Last modified time
@@ -6873,27 +6624,14 @@ classdef DataCleaningTool < matlab.apps.AppBase
 
         % Button pushed function: OneHotEncodingButton
         function OneHotEncodingButtonPushed(app, event)
-            %%%%%%%%%%%%%%%%%%%%
             % Changes background color to grey
             app.OneHotEncodingButton.BackgroundColor = [0.65,0.65,0.65];
             pause(0.000001);
             
-            % Present table
-            Tbl_true = app.UIMainTable.Data;
-            varNames_true = Tbl_true.Properties.VariableNames;
-            Tbl = removevars(Tbl_true,app.IdListBox.Items);
-            varNames = Tbl.Properties.VariableNames;
-            array_numeric = varfun(@isnumeric,Tbl,'output','uniform');
-            array_datetime = varfun(@isdatetime,Tbl,'output','uniform');
-            index_numeric = find(array_numeric==1);
-            index_datetime = find(array_datetime==1);
-            index_nottext = [index_numeric index_datetime];
-            Tbl_text = removevars(Tbl,index_nottext);
-            varNames_text = Tbl_text.Properties.VariableNames;
-            
             if isempty(app.UITextTable.Data) == false
                 if isempty(app.categoryEditField.Value) == false
-                    if app.categoryEditField.Value == "Transform n categories to n dummy variables for all text features"
+                   if app.categoryEditField.Value == "Transform n categories to n dummy variables for all text features"
+                        % Present table
                         Tbl = app.UIMainTable.Data;
                         Tbl_new = removevars(Tbl,string(app.SelectedCellTextEditField.Value));
                         Tbl1 = [Tbl_new GetTable(app, Tbl.(string(app.SelectedCellTextEditField.Value)))];
@@ -6921,7 +6659,7 @@ classdef DataCleaningTool < matlab.apps.AppBase
                 end
             end
             
-            %%%%% 1 Current data tab %%%%%
+            % Current data widget
             % Displays the original table with column names
             % Undo
             Tbl_true = app.UIMainTable.Data;
@@ -6937,7 +6675,6 @@ classdef DataCleaningTool < matlab.apps.AppBase
             app.UndoButton.BackgroundColor = [0.22 0.44 0.55];
             % Update
             Tbl = removevars(Tbl_true,app.IdListBox.Items);
-            varNames = Tbl.Properties.VariableNames;
             if l==0
                 fname1 = sprintf('saveddata/%s_updated.mat', app.EditField_7.Value);
             else
@@ -6967,7 +6704,7 @@ classdef DataCleaningTool < matlab.apps.AppBase
             varNames_text = Tbl_text.Properties.VariableNames;
             app.TextListBox.Items = string(varNames_text);
             
-            %%%%% 2 Data properties tab %%%%%
+            % Data properties widget
             writetable(Tbl_true,'filesize.csv')
             props = dir('filesize.csv');
             % Displays the file size in megabytes
@@ -6990,13 +6727,14 @@ classdef DataCleaningTool < matlab.apps.AppBase
             % Displays the number of deleted columns
             app.NumberOfDeletedColumnsEditField.Value = app.ActualNoOfColumnsEditField.Value - size(Tbl_true,2);
             % Missingness plot
-            A = ismissing(Tbl_true);
+            A = flip(ismissing(Tbl_true));
             imagesc(app.UIAxes6,A);
             cmap = winter(2);
             colormap(app.UIAxes7,cmap);
             app.UIAxes6.XTick = 1:length(varNames_true);
             app.UIAxes6.XTickLabel = varNames_true;
             app.UIAxes6.YTick = [1 size(Tbl_true,1)];
+            app.UIAxes6.YTickLabel = {string(size(Tbl_true,1)), '1'};
             app.UIAxes6.YDir = 'normal';
             app.UIAxes7.cla;
             % Displays the limits of two sliders
@@ -7018,7 +6756,7 @@ classdef DataCleaningTool < matlab.apps.AppBase
             app.UIAxes5.XTickLabel = varNames_true;
             app.UIAxes5.YLim = [0 100];
             
-            %%%%% 3 Numerical features tab %%%%%
+            % Numerical features widget
             % Descriptive statistics
             if app.NumberOfNumericalFeaturesEditField.Value ~= 0
                 a_numeric = zeros(1,size(Tbl_numeric,2));
@@ -7045,16 +6783,16 @@ classdef DataCleaningTool < matlab.apps.AppBase
                 app.UINumericTable.Data = {};
             end
             
-            %%%%% 4 Datetime features tab %%%%%
+            % Datetime features widget
             % Descriptive statistics
             if app.NumberOfDateTimeFeaturesEditField.Value ~= 0
-                a_datetime = {};
-                c_datetime = {};
+                a_datetime = cell([1 size(Tbl_datetime,2)]);
+                c_datetime = cell([1 size(Tbl_datetime,2)]);
                 DatesAndTimes = repmat({'Select'},size(Tbl_datetime,2),1);
                 l_datetime = repmat({'Select'},size(Tbl_datetime,2),1);
                 g_datetime = repmat({'Select'},size(Tbl_datetime,2),1);
-                e_datetime = {};
-                f_datetime = {};
+                e_datetime = cell([1 size(Tbl_datetime,2)]);
+                f_datetime = cell([1 size(Tbl_datetime,2)]);
                 for i = 1:size(Tbl_datetime,2)
                     a_datetime{i}=min(Tbl_datetime{:,i});
                     c_datetime{i}=max(Tbl_datetime{:,i});
@@ -7071,7 +6809,7 @@ classdef DataCleaningTool < matlab.apps.AppBase
                 app.UIDatetimeTable.Data = {};
             end
             
-            %%%%% 5 Text features tab %%%%%
+            % Text features widget
             % Descriptive statistics
             if app.NumberOfTextFeaturesEditField.Value ~= 0
                 a_text = {};
@@ -7087,32 +6825,23 @@ classdef DataCleaningTool < matlab.apps.AppBase
                 app.UITextTable.Data = {};
             end
             
-            %%%%% 6 Imputation tab %%%%%
+            % Imputation widget
             % Displays missing data percentage to be imputed
             app.PercentageofMissingDataEditField.Value = round((length(find(ismissing(Tbl_true)==1))/numel(Tbl_true))*100,2);
-            noofrows = app.NumberOfRowsEditField.Value;
-            noofcolumns = app.NumberOfColumnsEditField.Value;
-            noofnumericalfeatures = app.NumberOfNumericalFeaturesEditField.Value;
-            noofcategoricalfeatures = app.NumberOfTextFeaturesEditField.Value;
-            missingpercentagetobeimputed = app.PercentageofMissingDataEditField.Value;
-            [NRSME_pred,PEC_pred] = Interpolation(app,noofrows,noofcolumns,missingpercentagetobeimputed,noofnumericalfeatures,noofcategoricalfeatures);
-            % Displays expected error of imputation for numerical features
-            app.ExpectedErrorofImputationforNumericalFeaturesEditField.Value = NRSME_pred;
-            % Displays expected error of imputation for categorical features
-            app.ExpectedErrorofImputationforCategoricalFeaturesEditField.Value = PEC_pred;
             % Missing observations percentage table
             app.UIMissingObservationsTable_2.Data = t;
             % Missingness plot
-            A = ismissing(Tbl_true);
+            A = flip(ismissing(Tbl_true));
             imagesc(app.UIAxes8,A);
             cmap = winter(2);
             colormap(app.UIAxes9,cmap);
             app.UIAxes8.XTick = 1:length(varNames_true);
             app.UIAxes8.XTickLabel = varNames_true;
             app.UIAxes8.YTick = [1 size(Tbl_true,1)];
+            app.UIAxes8.YTickLabel = {string(size(Tbl_true,1)), '1'};
             app.UIAxes8.YDir = 'normal';
             
-            %%%%% 7 Data transformation tab %%%%%
+            % Data transformation widget
             app.SelectNumericalFeaturesListBox.Items = string(varNames_numeric);
             
             % Last modified time
@@ -7124,7 +6853,6 @@ classdef DataCleaningTool < matlab.apps.AppBase
 
         % Button pushed function: DeleteFeatureButton_2
         function DeleteFeatureButton_2Pushed2(app, event)
-            %%%%%%%%%%%%%%%%%%%%
             % Changes background color to grey
             app.DeleteFeatureButton_2.BackgroundColor = [0.65,0.65,0.65];
             pause(0.000001);
@@ -7146,7 +6874,7 @@ classdef DataCleaningTool < matlab.apps.AppBase
                 app.UIMainTable.ColumnName(index) = [];
             end
             
-            %%%%% 1 Current table %%%%%
+            % 1 Current table %
             % Displays the original table with column names
             % Undo
             Tbl_true = app.UIMainTable.Data;
@@ -7162,7 +6890,6 @@ classdef DataCleaningTool < matlab.apps.AppBase
             app.UndoButton.BackgroundColor = [0.22 0.44 0.55];
             % Update
             Tbl = removevars(Tbl_true,app.IdListBox.Items);
-            varNames = Tbl.Properties.VariableNames;
             if l==0
                 fname1 = sprintf('saveddata/%s_updated.mat', app.EditField_7.Value);
             else
@@ -7193,7 +6920,7 @@ classdef DataCleaningTool < matlab.apps.AppBase
             varNames_text = Tbl_text.Properties.VariableNames;
             app.TextListBox.Items = string(varNames_text);
             
-            %%%%% 2 Data properties %%%%%
+            % 2 Data properties %
             writetable(Tbl_true,'filesize.csv')
             props = dir('filesize.csv');
             % Displays the file size in megabytes
@@ -7222,13 +6949,14 @@ classdef DataCleaningTool < matlab.apps.AppBase
             % Displays the number of deleted columns
             app.NumberOfDeletedColumnsEditField.Value = app.ActualNoOfColumnsEditField.Value - size(Tbl_true,2);
             % Missingness plot
-            A = ismissing(Tbl_true);
+            A = flip(ismissing(Tbl_true));
             imagesc(app.UIAxes6,A);
             cmap = winter(2);
             colormap(app.UIAxes7,cmap);
             app.UIAxes6.XTick = 1:length(varNames_true);
             app.UIAxes6.XTickLabel = varNames_true;
             app.UIAxes6.YTick = [1 size(Tbl_true,1)];
+            app.UIAxes6.YTickLabel = {string(size(Tbl_true,1)), '1'};
             app.UIAxes6.YDir = 'normal';
             % Displays the limits of two sliders
             app.DeleteRowsMinSlider.Limits = [1 size(Tbl_true,1)];
@@ -7249,7 +6977,7 @@ classdef DataCleaningTool < matlab.apps.AppBase
             app.UIAxes5.XTickLabel = varNames_true;
             app.UIAxes5.YLim = [0 100];
             
-            %%%%% 3 Numerical features tab %%%%%
+            % Numerical features widget
             % Descriptive statistics
             if app.NumberOfNumericalFeaturesEditField.Value ~= 0
                 a_numeric = zeros(1,size(Tbl_numeric,2));
@@ -7276,16 +7004,16 @@ classdef DataCleaningTool < matlab.apps.AppBase
                 app.UINumericTable.Data = {};
             end
             
-            %%%%% 4 Datetime features tab %%%%%
+            % Datetime features widget
             % Descriptive statistics
             if app.NumberOfDateTimeFeaturesEditField.Value ~= 0
-                a_datetime = {};
-                c_datetime = {};
+                a_datetime = cell([1 size(Tbl_datetime,2)]);
+                c_datetime = cell([1 size(Tbl_datetime,2)]);
                 DatesAndTimes = repmat({'Select'},size(Tbl_datetime,2),1);
                 l_datetime = repmat({'Select'},size(Tbl_datetime,2),1);
                 g_datetime = repmat({'Select'},size(Tbl_datetime,2),1);
-                e_datetime = {};
-                f_datetime = {};
+                e_datetime = cell([1 size(Tbl_datetime,2)]);
+                f_datetime = cell([1 size(Tbl_datetime,2)]);
                 for i = 1:size(Tbl_datetime,2)
                     a_datetime{i}=min(Tbl_datetime{:,i});
                     c_datetime{i}=max(Tbl_datetime{:,i});
@@ -7302,7 +7030,7 @@ classdef DataCleaningTool < matlab.apps.AppBase
                 app.UIDatetimeTable.Data = {};
             end
             
-            %%%%% 5 Text features tab %%%%%
+            % Text features widget
             % Descriptive statistics
             if app.NumberOfTextFeaturesEditField.Value ~= 0
                 a_text = {};
@@ -7318,32 +7046,23 @@ classdef DataCleaningTool < matlab.apps.AppBase
                 app.UITextTable.Data = {};
             end
             
-            %%%%% 6 Imputation tab %%%%%
+            % Imputation widget
             % Displays missing data percentage to be imputed
             app.PercentageofMissingDataEditField.Value = round((length(find(ismissing(Tbl_true)==1))/numel(Tbl_true))*100,2);
-            noofrows = app.NumberOfRowsEditField.Value;
-            noofcolumns = app.NumberOfColumnsEditField.Value;
-            noofnumericalfeatures = app.NumberOfNumericalFeaturesEditField.Value;
-            noofcategoricalfeatures = app.NumberOfTextFeaturesEditField.Value;
-            missingpercentagetobeimputed = app.PercentageofMissingDataEditField.Value;
-            [NRSME_pred,PEC_pred] = Interpolation(app,noofrows,noofcolumns,missingpercentagetobeimputed,noofnumericalfeatures,noofcategoricalfeatures);
-            % Displays expected error of imputation for numerical features
-            app.ExpectedErrorofImputationforNumericalFeaturesEditField.Value = NRSME_pred;
-            % Displays expected error of imputation for categorical features
-            app.ExpectedErrorofImputationforCategoricalFeaturesEditField.Value = PEC_pred;
             % Missing observations percentage table
             app.UIMissingObservationsTable_2.Data = t;
             % Missingness plot
-            A = ismissing(Tbl_true);
+            A = flip(ismissing(Tbl_true));
             imagesc(app.UIAxes8,A);
             cmap = winter(2);
             colormap(app.UIAxes9,cmap);
             app.UIAxes8.XTick = 1:length(varNames_true);
             app.UIAxes8.XTickLabel = varNames_true;
             app.UIAxes8.YTick = [1 size(Tbl_true,1)];
+            app.UIAxes8.YTickLabel = {string(size(Tbl_true,1)), '1'};
             app.UIAxes8.YDir = 'normal';
             
-            %%%%% 7 Data transformation tab %%%%%
+            % Data transformation widget
             app.SelectNumericalFeaturesListBox.Items = string(varNames_numeric);
             
             % Last modified time
@@ -7355,28 +7074,24 @@ classdef DataCleaningTool < matlab.apps.AppBase
 
         % Cell selection callback: UIMissingObservationsTable_2
         function UIMissingObservationsTable_2CellSelection(app, event)
-            %%%%%%%%%%%%%%%%%%%%
             indices = event.Indices;
             app.EditFieldWhatsLeft2.Value = indices(1);
         end
 
         % Value changed function: EditField_8
         function EditField_8ValueChanged(app, event)
-            %%%%%%%%%%%%%%%%%%%%
             value = app.EditField_8.Value;
             app.DeleteRowsMinSlider.Value = value;
         end
 
         % Value changed function: EditField_9
         function EditField_9ValueChanged(app, event)
-            %%%%%%%%%%%%%%%%%%%%
             value = app.EditField_9.Value;
             app.DeleteRowsMaxSlider.Value = value;
         end
 
         % Cell edit callback: UINumericTable
         function UINumericTableCellEdit(app, event)
-            %%%%%%%%%%%%%%%%%%%%
             indices = event.Indices;
             newData = event.NewData;
             if indices(2) == 8
@@ -7389,7 +7104,6 @@ classdef DataCleaningTool < matlab.apps.AppBase
 
         % Cell edit callback: UIDatetimeTable
         function UIDatetimeTableCellEdit(app, event)
-            %%%%%%%%%%%%%%%%%%%%
             indices = event.Indices;
             newData = event.NewData;
             if indices(2) == 8
@@ -7402,7 +7116,6 @@ classdef DataCleaningTool < matlab.apps.AppBase
 
         % Close request function: UIFigureDataCleaningTool
         function UIFigureDataCleaningToolCloseRequest(app, event)
-            %%%%%%%%%%%%%%%%%%%%
             if exist('saveddata', 'dir')
                     rmdir('saveddata', 's')
             end
@@ -8064,7 +7777,7 @@ classdef DataCleaningTool < matlab.apps.AppBase
             app.UIAxes.FontWeight = 'bold';
             app.UIAxes.TickLabelInterpreter = 'latex';
             app.UIAxes.XTickLabelRotation = 30;
-            app.UIAxes.Position = [867 169 396 504];
+            app.UIAxes.Position = [867 169 396 459];
 
             % Create MinEditSliderNumeric
             app.MinEditSliderNumeric = uislider(app.NumericalFeaturesTab);
@@ -8160,6 +7873,18 @@ classdef DataCleaningTool < matlab.apps.AppBase
             app.UITable2_8.Visible = 'off';
             app.UITable2_8.Position = [437 15 364 87];
 
+            % Create NumberofBinsEditFieldLabel
+            app.NumberofBinsEditFieldLabel = uilabel(app.NumericalFeaturesTab);
+            app.NumberofBinsEditFieldLabel.HorizontalAlignment = 'right';
+            app.NumberofBinsEditFieldLabel.FontWeight = 'bold';
+            app.NumberofBinsEditFieldLabel.Position = [980 641 95 22];
+            app.NumberofBinsEditFieldLabel.Text = 'Number of Bins';
+
+            % Create NumberofBinsEditField
+            app.NumberofBinsEditField = uieditfield(app.NumericalFeaturesTab, 'numeric');
+            app.NumberofBinsEditField.HorizontalAlignment = 'center';
+            app.NumberofBinsEditField.Position = [1094 641 72 22];
+
             % Create DatetimeFeaturesTab
             app.DatetimeFeaturesTab = uitab(app.TabGroup);
             app.DatetimeFeaturesTab.Title = 'Datetime Features';
@@ -8173,7 +7898,7 @@ classdef DataCleaningTool < matlab.apps.AppBase
             app.UIAxes4_3.PlotBoxAspectRatio = [0.818807339449541 1 0.818807339449541];
             app.UIAxes4_3.FontWeight = 'bold';
             app.UIAxes4_3.XTickLabelRotation = 30;
-            app.UIAxes4_3.Position = [857 171 406 501];
+            app.UIAxes4_3.Position = [857 171 406 461];
 
             % Create MinEditSliderDatetime
             app.MinEditSliderDatetime = uislider(app.DatetimeFeaturesTab);
@@ -8559,7 +8284,7 @@ classdef DataCleaningTool < matlab.apps.AppBase
             % Create PercentageofMissingDataEditField
             app.PercentageofMissingDataEditField = uieditfield(app.ImputationTab, 'numeric');
             app.PercentageofMissingDataEditField.HorizontalAlignment = 'center';
-            app.PercentageofMissingDataEditField.Position = [336 599 91 22];
+            app.PercentageofMissingDataEditField.Position = [187 599 91 22];
 
             % Create UIMissingObservationsTable_2
             app.UIMissingObservationsTable_2 = uitable(app.ImputationTab);
@@ -8576,30 +8301,6 @@ classdef DataCleaningTool < matlab.apps.AppBase
             app.DeleteFeatureButton_2.FontColor = [1 1 1];
             app.DeleteFeatureButton_2.Position = [148 649 105 23];
             app.DeleteFeatureButton_2.Text = 'Delete Feature';
-
-            % Create ExpectedErrorofImputationforNumericalFeaturesEditFieldLabel
-            app.ExpectedErrorofImputationforNumericalFeaturesEditFieldLabel = uilabel(app.ImputationTab);
-            app.ExpectedErrorofImputationforNumericalFeaturesEditFieldLabel.HorizontalAlignment = 'right';
-            app.ExpectedErrorofImputationforNumericalFeaturesEditFieldLabel.FontWeight = 'bold';
-            app.ExpectedErrorofImputationforNumericalFeaturesEditFieldLabel.Position = [6 567 309 22];
-            app.ExpectedErrorofImputationforNumericalFeaturesEditFieldLabel.Text = 'Expected Error of Imputation for Numerical Features';
-
-            % Create ExpectedErrorofImputationforNumericalFeaturesEditField
-            app.ExpectedErrorofImputationforNumericalFeaturesEditField = uieditfield(app.ImputationTab, 'numeric');
-            app.ExpectedErrorofImputationforNumericalFeaturesEditField.HorizontalAlignment = 'center';
-            app.ExpectedErrorofImputationforNumericalFeaturesEditField.Position = [337 567 91 22];
-
-            % Create ExpectedErrorofImputationforCategoricalFeaturesEditFieldLabel
-            app.ExpectedErrorofImputationforCategoricalFeaturesEditFieldLabel = uilabel(app.ImputationTab);
-            app.ExpectedErrorofImputationforCategoricalFeaturesEditFieldLabel.HorizontalAlignment = 'right';
-            app.ExpectedErrorofImputationforCategoricalFeaturesEditFieldLabel.FontWeight = 'bold';
-            app.ExpectedErrorofImputationforCategoricalFeaturesEditFieldLabel.Position = [7 535 316 22];
-            app.ExpectedErrorofImputationforCategoricalFeaturesEditFieldLabel.Text = 'Expected Error of Imputation for Categorical Features';
-
-            % Create ExpectedErrorofImputationforCategoricalFeaturesEditField
-            app.ExpectedErrorofImputationforCategoricalFeaturesEditField = uieditfield(app.ImputationTab, 'numeric');
-            app.ExpectedErrorofImputationforCategoricalFeaturesEditField.HorizontalAlignment = 'center';
-            app.ExpectedErrorofImputationforCategoricalFeaturesEditField.Position = [337 535 91 22];
 
             % Create UITable2_14
             app.UITable2_14 = uitable(app.ImputationTab);
@@ -8630,38 +8331,27 @@ classdef DataCleaningTool < matlab.apps.AppBase
             % Create PercentageofMissingDataImputedEditField
             app.PercentageofMissingDataImputedEditField = uieditfield(app.ImputationTab, 'numeric');
             app.PercentageofMissingDataImputedEditField.HorizontalAlignment = 'center';
-            app.PercentageofMissingDataImputedEditField.Position = [1061 599 91 22];
+            app.PercentageofMissingDataImputedEditField.Position = [959 599 91 22];
 
-            % Create ExpectedErrorofImputationforNumericalFeaturesEditField_2Label
-            app.ExpectedErrorofImputationforNumericalFeaturesEditField_2Label = uilabel(app.ImputationTab);
-            app.ExpectedErrorofImputationforNumericalFeaturesEditField_2Label.HorizontalAlignment = 'right';
-            app.ExpectedErrorofImputationforNumericalFeaturesEditField_2Label.FontWeight = 'bold';
-            app.ExpectedErrorofImputationforNumericalFeaturesEditField_2Label.Position = [729 567 309 22];
-            app.ExpectedErrorofImputationforNumericalFeaturesEditField_2Label.Text = 'Expected Error of Imputation for Numerical Features';
+            % Create NumberofTreesEditFieldLabel
+            app.NumberofTreesEditFieldLabel = uilabel(app.ImputationTab);
+            app.NumberofTreesEditFieldLabel.HorizontalAlignment = 'right';
+            app.NumberofTreesEditFieldLabel.FontWeight = 'bold';
+            app.NumberofTreesEditFieldLabel.Position = [844 537 100 22];
+            app.NumberofTreesEditFieldLabel.Text = 'Number of Trees';
 
-            % Create ExpectedErrorofImputationforNumericalFeaturesEditField_2
-            app.ExpectedErrorofImputationforNumericalFeaturesEditField_2 = uieditfield(app.ImputationTab, 'numeric');
-            app.ExpectedErrorofImputationforNumericalFeaturesEditField_2.HorizontalAlignment = 'center';
-            app.ExpectedErrorofImputationforNumericalFeaturesEditField_2.Position = [1062 567 91 22];
+            % Create NumberofTreesEditField
+            app.NumberofTreesEditField = uieditfield(app.ImputationTab, 'numeric');
+            app.NumberofTreesEditField.HorizontalAlignment = 'center';
+            app.NumberofTreesEditField.Position = [963 537 72 22];
+            app.NumberofTreesEditField.Value = 10;
 
-            % Create ExpectedErrorofImputationforCategoricalFeaturesEditField_2Label
-            app.ExpectedErrorofImputationforCategoricalFeaturesEditField_2Label = uilabel(app.ImputationTab);
-            app.ExpectedErrorofImputationforCategoricalFeaturesEditField_2Label.HorizontalAlignment = 'right';
-            app.ExpectedErrorofImputationforCategoricalFeaturesEditField_2Label.FontWeight = 'bold';
-            app.ExpectedErrorofImputationforCategoricalFeaturesEditField_2Label.Position = [730 535 316 22];
-            app.ExpectedErrorofImputationforCategoricalFeaturesEditField_2Label.Text = 'Expected Error of Imputation for Categorical Features';
-
-            % Create ExpectedErrorofImputationforCategoricalFeaturesEditField_2
-            app.ExpectedErrorofImputationforCategoricalFeaturesEditField_2 = uieditfield(app.ImputationTab, 'numeric');
-            app.ExpectedErrorofImputationforCategoricalFeaturesEditField_2.HorizontalAlignment = 'center';
-            app.ExpectedErrorofImputationforCategoricalFeaturesEditField_2.Position = [1062 535 91 22];
-
-            % Create DatatransformationTab
-            app.DatatransformationTab = uitab(app.TabGroup);
-            app.DatatransformationTab.Title = 'Data transformation';
+            % Create DataTransformationTab
+            app.DataTransformationTab = uitab(app.TabGroup);
+            app.DataTransformationTab.Title = 'Data Transformation';
 
             % Create TransformButton
-            app.TransformButton = uibutton(app.DatatransformationTab, 'push');
+            app.TransformButton = uibutton(app.DataTransformationTab, 'push');
             app.TransformButton.ButtonPushedFcn = createCallbackFcn(app, @TransformButtonPushed, true);
             app.TransformButton.BackgroundColor = [0 0 0];
             app.TransformButton.FontWeight = 'bold';
@@ -8670,22 +8360,22 @@ classdef DataCleaningTool < matlab.apps.AppBase
             app.TransformButton.Text = 'Transform ';
 
             % Create SelectNumericalFeaturesListBox
-            app.SelectNumericalFeaturesListBox = uilistbox(app.DatatransformationTab);
+            app.SelectNumericalFeaturesListBox = uilistbox(app.DataTransformationTab);
             app.SelectNumericalFeaturesListBox.Items = {};
             app.SelectNumericalFeaturesListBox.Multiselect = 'on';
             app.SelectNumericalFeaturesListBox.ValueChangedFcn = createCallbackFcn(app, @SelectNumericalFeaturesListBoxValueChanged, true);
-            app.SelectNumericalFeaturesListBox.Position = [13 77 215 561];
+            app.SelectNumericalFeaturesListBox.Position = [13 78 215 536];
             app.SelectNumericalFeaturesListBox.Value = {};
 
             % Create SelectedListBox
-            app.SelectedListBox = uilistbox(app.DatatransformationTab);
+            app.SelectedListBox = uilistbox(app.DataTransformationTab);
             app.SelectedListBox.Items = {};
             app.SelectedListBox.ValueChangedFcn = createCallbackFcn(app, @SelectedListBoxValueChanged, true);
-            app.SelectedListBox.Position = [261 77 215 561];
+            app.SelectedListBox.Position = [261 78 215 536];
             app.SelectedListBox.Value = {};
 
             % Create UIAxes_2
-            app.UIAxes_2 = uiaxes(app.DatatransformationTab);
+            app.UIAxes_2 = uiaxes(app.DataTransformationTab);
             title(app.UIAxes_2, 'Histogram of numerical feature')
             xlabel(app.UIAxes_2, '')
             ylabel(app.UIAxes_2, 'Frequency')
@@ -8693,42 +8383,54 @@ classdef DataCleaningTool < matlab.apps.AppBase
             app.UIAxes_2.FontWeight = 'bold';
             app.UIAxes_2.TickLabelInterpreter = 'latex';
             app.UIAxes_2.XTickLabelRotation = 30;
-            app.UIAxes_2.Position = [690 72 568 603];
+            app.UIAxes_2.Position = [695 77 563 509];
 
             % Create DataTransformationDropDown
-            app.DataTransformationDropDown = uidropdown(app.DatatransformationTab);
+            app.DataTransformationDropDown = uidropdown(app.DataTransformationTab);
             app.DataTransformationDropDown.Items = {'Select', 'mean 0 and standard deviation 1', 'between 0 and 1', 'ln', 'log10', 'log2', 'exp', 'sqrt', 'reciprocal'};
             app.DataTransformationDropDown.ValueChangedFcn = createCallbackFcn(app, @DataTransformationDropDownValueChanged, true);
             app.DataTransformationDropDown.Position = [521 643 122 21];
             app.DataTransformationDropDown.Value = 'Select';
 
             % Create TextArea_11
-            app.TextArea_11 = uitextarea(app.DatatransformationTab);
+            app.TextArea_11 = uitextarea(app.DataTransformationTab);
             app.TextArea_11.HorizontalAlignment = 'center';
             app.TextArea_11.FontWeight = 'bold';
             app.TextArea_11.BackgroundColor = [0.9412 0.9412 0.9412];
-            app.TextArea_11.Position = [13 637 215 25];
+            app.TextArea_11.Position = [13 614 215 26];
             app.TextArea_11.Value = {'Select Numerical Features'};
 
             % Create TextArea_12
-            app.TextArea_12 = uitextarea(app.DatatransformationTab);
+            app.TextArea_12 = uitextarea(app.DataTransformationTab);
             app.TextArea_12.HorizontalAlignment = 'center';
             app.TextArea_12.FontWeight = 'bold';
             app.TextArea_12.BackgroundColor = [0.9412 0.9412 0.9412];
-            app.TextArea_12.Position = [261 637 215 26];
+            app.TextArea_12.Position = [261 614 215 26];
             app.TextArea_12.Value = {'Selected Numerical Features'};
 
             % Create transformationEditField
-            app.transformationEditField = uieditfield(app.DatatransformationTab, 'text');
+            app.transformationEditField = uieditfield(app.DataTransformationTab, 'text');
             app.transformationEditField.Visible = 'off';
             app.transformationEditField.Position = [545 345 100 22];
 
             % Create DataTransformationErrorEditField
-            app.DataTransformationErrorEditField = uieditfield(app.DatatransformationTab, 'text');
+            app.DataTransformationErrorEditField = uieditfield(app.DataTransformationTab, 'text');
             app.DataTransformationErrorEditField.FontWeight = 'bold';
             app.DataTransformationErrorEditField.FontColor = [1 0 0];
             app.DataTransformationErrorEditField.Visible = 'off';
             app.DataTransformationErrorEditField.Position = [13 25 1245 33];
+
+            % Create NumberofBinsEditFieldLabel_2
+            app.NumberofBinsEditFieldLabel_2 = uilabel(app.DataTransformationTab);
+            app.NumberofBinsEditFieldLabel_2.HorizontalAlignment = 'right';
+            app.NumberofBinsEditFieldLabel_2.FontWeight = 'bold';
+            app.NumberofBinsEditFieldLabel_2.Position = [882 614 95 22];
+            app.NumberofBinsEditFieldLabel_2.Text = 'Number of Bins';
+
+            % Create NumberofBinsEditField_2
+            app.NumberofBinsEditField_2 = uieditfield(app.DataTransformationTab, 'numeric');
+            app.NumberofBinsEditField_2.HorizontalAlignment = 'center';
+            app.NumberofBinsEditField_2.Position = [1001 614 72 22];
 
             % Create SaveDataTab
             app.SaveDataTab = uitab(app.TabGroup);
@@ -8935,7 +8637,7 @@ classdef DataCleaningTool < matlab.apps.AppBase
     methods (Access = public)
 
         % Construct app
-        function app = DataCleaningTool_exported
+        function app = DataCleaningTool
 
             % Create and configure components
             createComponents(app)
